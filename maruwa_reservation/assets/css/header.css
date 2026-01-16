@@ -1,0 +1,52 @@
+body {
+    font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    margin: 0;
+    background-color: #f8f8f8;
+}
+
+.header {
+    background-color: #222;
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header a.home-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.header h1 {
+    margin: 0 0 4px 0;
+    font-size: 28px;
+}
+
+.header p {
+    margin: 0;
+    color: #ddd;
+}
+
+.headergroup table {
+    width: 100%;
+    background-color: #333;
+    text-align: center;
+}
+
+.headergroup th a {
+    display: block;
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+.headergroup th a:hover {
+    background-color: #555;
+}
+
+.language-selector select {
+    padding: 5px 8px;
+    font-size: 16px;
+    border-radius: 4px;
+}

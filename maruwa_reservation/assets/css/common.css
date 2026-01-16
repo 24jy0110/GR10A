@@ -1,0 +1,12 @@
+.content-box {
+    width: 70%;
+    margin: 40px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.usage-steps {
+    line-height: 1.8;
+    margin-top: 20px;
+}
