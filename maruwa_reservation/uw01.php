@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>利用方法 | 丸和交通株式会社</title>
+    <style>
+    .back-row {
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    .btn-back {
+      display: inline-block;
+      padding: 10px 24px;
+      border: 1px solid #000;
+      color: #000;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+        </style>
 </head>
 <body>
 
@@ -34,7 +49,10 @@
         </li>
     </ol>
 
-    <a href="index.php" class="btn-back">← 戻る</a>
+    <div class="back-row">
+    <a href="index.php" class="btn-back">ホームページへ</a>
+  </div>
+</div>
 </div>
 
 <?php include("includes/footer.php"); ?>

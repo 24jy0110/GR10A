@@ -67,19 +67,20 @@
             font-size: 16px;
         }
 
-        .back-row {
-            margin: 40px 0 20px;
-            text-align: center;
-        }
+       
+    .back-row {
+      text-align: center;
+      padding: 30px 0;
+    }
 
-        .btn-back {
-            padding: 10px 24px;
-            border: 1px solid #333;
-            text-decoration: none;
-            color: #333;
-            border-radius: 6px;
-        }
-
+    .btn-back {
+      display: inline-block;
+      padding: 10px 24px;
+      border: 1px solid #000;
+      color: #000;
+      text-decoration: none;
+      border-radius: 4px;
+    }
         .btn-back:hover {
             background-color: #f5f5f5;
         }

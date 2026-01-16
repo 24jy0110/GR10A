@@ -179,6 +179,11 @@ h2 {
   background: #fff;
   cursor: pointer;
 }
+
+.back-row {
+      text-align: center;
+      padding: 30px 0;
+    }
 </style>
 </head>
 
