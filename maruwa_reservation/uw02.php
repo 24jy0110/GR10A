@@ -119,8 +119,10 @@
 
 <body>
 
-<?php include("includes/header.php"); ?>
-
+<?php
+$currentPage = 'uw02';
+include('includes/header.php');
+?>
 <div class="container">
     <!-- 页面主标题 -->
     <h2 data-key="area_title">サービス提供エリア</h2>

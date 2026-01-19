@@ -113,7 +113,10 @@
 
 <body>
 
-<?php include("includes/header.php"); ?>
+<?php
+$currentPage = 'uw03';
+include('includes/header.php');
+?>
 
 <div class="container">
   <h2>車種紹介</h2>

@@ -13,14 +13,13 @@ if (empty($_SESSION['reserve'])) {
    次へ（車種選択）
 ================================ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['reserve']['car_type']  = $_POST['car_type']  ?? '';
-    $_SESSION['reserve']['car_price'] = $_POST['car_price'] ?? '';
+
+    $_SESSION['reserve']['car_type'] = $_POST['car_type'] ?? '';
+    $_SESSION['reserve']['price']    = $_POST['price'] ?? '';
 
     header('Location: uw05_03.php');
     exit;
 }
-
-$res = $_SESSION['reserve'];
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -116,11 +115,18 @@ h2 {
 
 <form method="post">
 
+<!-- ★ 実際に送信される hidden（1セットのみ） -->
+<input type="hidden" name="car_type" id="car_type">
+<input type="hidden" name="price" id="price">
+
 <table class="car-table">
+
 <tr>
   <td class="car-radio">
-    <input type="radio" name="car_type" value="CROWN" required>
-    <input type="hidden" name="car_price" value="65000">
+    <input type="radio" name="car"
+           value="CROWN"
+           data-price="65000"
+           required>
   </td>
   <td class="car-img">
     <img src="imgs/crown.jpg" alt="トヨタ クラウン">
@@ -136,8 +142,9 @@ h2 {
 
 <tr>
   <td class="car-radio">
-    <input type="radio" name="car_type" value="ALPHARD">
-    <input type="hidden" name="car_price" value="70000">
+    <input type="radio" name="car"
+           value="ALPHARD"
+           data-price="70000">
   </td>
   <td class="car-img">
     <img src="imgs/alphard.jpg" alt="トヨタ アルファード">
@@ -153,8 +160,9 @@ h2 {
 
 <tr>
   <td class="car-radio">
-    <input type="radio" name="car_type" value="HIACE">
-    <input type="hidden" name="car_price" value="75000">
+    <input type="radio" name="car"
+           value="HIACE"
+           data-price="75000">
   </td>
   <td class="car-img">
     <img src="imgs/HIACE.png" alt="トヨタ ハイエース">
@@ -167,6 +175,7 @@ h2 {
     <p>料金：75,000円（83,000円）／日</p>
   </td>
 </tr>
+
 </table>
 
 <p class="note">
@@ -183,6 +192,18 @@ h2 {
 </div>
 
 <?php include("includes/footer.php"); ?>
+
+<script>
+/* ===============================
+   車種選択 → hidden に反映
+================================ */
+document.querySelectorAll('input[name="car"]').forEach(radio => {
+  radio.addEventListener('change', function () {
+    document.getElementById('car_type').value = this.value;
+    document.getElementById('price').value    = this.dataset.price;
+  });
+});
+</script>
 
 </body>
 </html>

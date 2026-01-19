@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once 'includes/db_connect.php';
 
 /* ===============================
    SESSION チェック
@@ -13,118 +12,156 @@ if (empty($_SESSION['reserve'])) {
 $res = $_SESSION['reserve'];
 
 /* ===============================
-   営業所コード対応表
+   DB 接続
 ================================ */
-$officeMap = [
-  '亀沢本社'     => 'OFCE001',
-  '豊島支社'     => 'OFCE002',
-  '桃井支社'     => 'OFCE003',
-  '富士見町支社' => 'OFCE004',
-  '本羽田支社'   => 'OFCE005',
-  '中区支社'     => 'OFCE006',
-];
+$dsn = 'mysql:host=localhost;dbname=24jy0141;charset=utf8mb4';
+$user = 'root';
+$pass = '';
 
-// 前段で決定済みの営業所名
-$office_name = $res['office_name'] ?? '亀沢本社';
-$office_code = $officeMap[$office_name] ?? 'OFCE001';
+try {
+    $pdo = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    die('DB接続エラー：' . $e->getMessage());
+}
 
 /* ===============================
-   予約番号生成
-   例：20251101001
+   予約番号生成（yymmdd + 連番）
 ================================ */
-$today = date('Ymd');
+$today = date('ymd');
 
-// 同日件数を取得
 $stmt = $pdo->prepare(
-  "SELECT COUNT(*) FROM reservations WHERE reserve_date = :d"
+    "SELECT COUNT(*) FROM reservation WHERE reservation_number LIKE :prefix"
 );
-$stmt->execute([':d' => $today]);
+$stmt->execute([':prefix' => $today . '%']);
 $count = $stmt->fetchColumn() + 1;
 
-$reserve_no = $today . str_pad($count, 3, '0', STR_PAD_LEFT);
+$reservationNumber = $today . str_pad($count, 3, '0', STR_PAD_LEFT);
 
 /* ===============================
-   DB 登録（仮予約）
+   データ整形
+================================ */
+$rideLocation =
+    $res['pickup_pref'] . ' ' .
+    $res['pickup_city'] . ' ' .
+    $res['pickup_detail'];
+
+$dropLocation =
+    $res['drop_pref'] . ' ' .
+    $res['drop_city'] . ' ' .
+    $res['drop_detail'];
+
+$serviceStart = $res['start_date'] . ' ' . ($res['start_time'] ?: '07:00');
+
+/* ===============================
+   INSERT
 ================================ */
 $sql = "
-INSERT INTO reservations (
-  reserve_no,
-  reserve_date,
-  start_date,
-  start_time,
-  end_date,
-  people,
-  car_type,
-  pickup_area,
-  pickup_city,
-  pickup_detail,
-  drop_area,
-  drop_city,
-  drop_detail,
-  lang1,
-  lang2,
-  price,
+INSERT INTO reservation (
+  reservation_number,
+  reservation_date,
+  ride_count,
+  ride_location,
+  drop_off_location,
+  service_start_time,
+  usage_fee,
   customer_name,
+  customer_email,
+  customer_phone,
   customer_name_kana,
-  email,
-  phone,
-  office_code,
-  status,
-  created_at
+  lang_pref_1,
+  lang_pref_2,
+  state_code,
+  number_plate,
+  driver_id
 ) VALUES (
-  :reserve_no,
-  :reserve_date,
-  :start_date,
-  :start_time,
-  :end_date,
-  :people,
-  :car_type,
-  :pickup_area,
-  :pickup_city,
-  :pickup_detail,
-  :drop_area,
-  :drop_city,
-  :drop_detail,
-  :lang1,
-  :lang2,
-  :price,
+  :reservation_number,
+  :reservation_date,
+  :ride_count,
+  :ride_location,
+  :drop_off_location,
+  :service_start_time,
+  :usage_fee,
   :customer_name,
+  :customer_email,
+  :customer_phone,
   :customer_name_kana,
-  :email,
-  :phone,
-  :office_code,
-  '仮予約',
-  NOW()
+  :lang_pref_1,
+  :lang_pref_2,
+  :state_code,
+  :number_plate,
+  :driver_id
 )";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([
-  ':reserve_no'         => $reserve_no,
-  ':reserve_date'       => $today,
-  ':start_date'         => $res['start_date'],
-  ':start_time'         => $res['start_time'],
-  ':end_date'           => $res['end_date'],
-  ':people'             => $res['people'],
-  ':car_type'           => $res['car_type'],
-  ':pickup_area'        => $res['pickup_area'],
-  ':pickup_city'        => $res['pickup_city'],
-  ':pickup_detail'      => $res['pickup_detail'],
-  ':drop_area'          => $res['drop_area'],
-  ':drop_city'          => $res['drop_city'],
-  ':drop_detail'        => $res['drop_detail'],
-  ':lang1'              => $res['lang1'],
-  ':lang2'              => $res['lang2'],
-  ':price'              => $res['car_price'],
-  ':customer_name'      => $res['customer_name'],
-  ':customer_name_kana' => $res['customer_name_kana'],
-  ':email'              => $res['customer_email'],
-  ':phone'              => $res['customer_phone'],
-  ':office_code'        => $office_code,
+    ':reservation_number' => $reservationNumber,
+    ':reservation_date'   => $res['start_date'],
+    ':ride_count'         => $res['people'],
+    ':ride_location'      => $rideLocation,
+    ':drop_off_location'  => $dropLocation,
+    ':service_start_time' => $serviceStart,
+    ':usage_fee'          => $res['car_price'],
+    ':customer_name'      => $res['customer_name'],
+    ':customer_email'     => $res['customer_email'],
+    ':customer_phone'     => $res['customer_phone'],
+    ':customer_name_kana' => $res['customer_name_kana'],
+    ':lang_pref_1'        => $res['lang1'],
+    ':lang_pref_2'        => $res['lang2'],
+    ':state_code'         => 'TMP',          // 仮予約
+    ':number_plate'       => 'UNASSIGNED',
+    ':driver_id'          => 'UNASSIGNED'
 ]);
 
 /* ===============================
-   SESSION クリア
+   仮予約メール送信
 ================================ */
-unset($_SESSION['reserve']);
+$to = $res['customer_email'];
+$subject = '【丸和交通】仮予約受付のお知らせ';
+
+$message = <<<MAIL
+{$res['customer_name']} 様
+
+このたびは、丸和交通株式会社の観光ハイヤーサービスに
+お申し込みいただき、誠にありがとうございます。
+
+下記内容にて【仮予約】を受け付けいたしました。
+
+■ 仮予約番号
+{$reservationNumber}
+
+■ ご利用日
+{$serviceStart}
+
+■ 乗車場所
+{$rideLocation}
+
+■ 降車場所
+{$dropLocation}
+
+現在はまだ【仮予約】の状態です。
+車両およびドライバーの手配が完了次第、
+【本予約確定】のご連絡を差し上げます。
+
+ご不明な点がございましたら、下記までお問い合わせください。
+
+――――――――――――
+丸和交通株式会社 観光ハイヤー予約センター
+TEL：03-1234-5678（8:00〜22:00）
+MAIL：support@maruwa-taxi.jp
+――――――――――――
+
+MAIL;
+
+$headers = "From: support@maruwa-taxi.jp";
+
+mail($to, $subject, $message, $headers);
+
+/* ===============================
+   SESSION クリア（任意）
+================================ */
+// session_destroy();
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -132,58 +169,28 @@ unset($_SESSION['reserve']);
 <meta charset="UTF-8">
 <title>仮予約完了 | 丸和交通株式会社</title>
 <link rel="stylesheet" href="./assets/app.css">
-
 <style>
 .container {
-  max-width: 900px;
-  margin: 50px auto;
-  padding: 0 20px;
+  max-width: 800px;
+  margin: 60px auto;
   text-align: center;
 }
-
-h2 {
-  font-size: 26px;
-  margin-bottom: 20px;
-}
-
-.reserve-no {
-  font-size: 20px;
+.res-number {
+  font-size: 22px;
+  font-weight: bold;
   margin: 20px 0;
 }
-
-.reserve-no span {
-  color: red;
-  font-weight: bold;
-}
-
-.flow {
-  text-align: left;
-  max-width: 700px;
-  margin: 30px auto;
+.note {
   font-size: 14px;
   line-height: 1.8;
 }
-
-.contact {
-  text-align: left;
-  max-width: 700px;
-  margin: 30px auto;
-  font-size: 14px;
-}
-
 .btn-home {
   margin-top: 40px;
   padding: 12px 40px;
-  font-size: 16px;
   border: 1px solid #000;
   background: #fff;
   cursor: pointer;
 }
-
-.back-row {
-      text-align: center;
-      padding: 30px 0;
-    }
 </style>
 </head>
 
@@ -192,41 +199,24 @@ h2 {
 <?php include("includes/header.php"); ?>
 
 <div class="container">
-<h2>仮予約を受け付けました</h2>
+  <h2>仮予約を受け付けました</h2>
 
-<p>
-お客様のご入力内容で、<strong>仮予約</strong>を受け付けました。<br>
-現在点ではまだ<strong style="color:red;">本予約（配車確定）ではありません</strong>。
-</p>
+  <p class="note">
+    現時点ではまだ本予約（配車確定）ではありません。<br>
+    手配完了後、改めてご連絡いたします。
+  </p>
 
-<div class="reserve-no">
-【予約番号：<span><?php echo $reserve_no; ?></span>】<br>
-※必ずお控えください。
-</div>
+  <div class="res-number">
+    【予約番号：<?= htmlspecialchars($reservationNumber) ?>】
+  </div>
 
-<div class="flow">
-<h3>今後の流れ</h3>
-<ol>
-<li>弊社にて、車両およびドライバーの空き状況を確認します。</li>
-<li>確認完了後、本予約可否・確定料金をメールにてご連絡します。</li>
-<li>内容に問題がなければ、本予約として配車を行います。</li>
-<li>出発日が近い場合やお急ぎの場合は、お電話にてお問い合わせください。</li>
-</ol>
-</div>
+  <p class="note">
+    予約番号は必ずお控えください。
+  </p>
 
-<div class="contact">
-<h3>お問い合わせ</h3>
-<p>
-電話：03-1234-5678（8:00〜22:00）<br>
-メール：support@maruwa-taxi.jp<br>
-LINE公式アカウント：@maruwa-taxi
-</p>
-</div>
-
-<button class="btn-home" onclick="location.href='index.php'">
-ホームページへ
-</button>
-
+  <button class="btn-home" onclick="location.href='index.php'">
+    ホームページへ
+  </button>
 </div>
 
 <?php include("includes/footer.php"); ?>

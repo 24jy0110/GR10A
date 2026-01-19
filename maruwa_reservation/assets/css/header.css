@@ -1,8 +1,16 @@
-body {
+/* ===============================
+   共通基础
+   =============================== */
+
+   body {
     font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
     margin: 0;
     background-color: #f8f8f8;
 }
+
+/* ===============================
+   上部 Header
+   =============================== */
 
 .header {
     background-color: #222;
@@ -28,25 +36,43 @@ body {
     color: #ddd;
 }
 
-.headergroup table {
-    width: 100%;
-    background-color: #333;
-    text-align: center;
-}
-
-.headergroup th a {
-    display: block;
-    padding: 10px;
-    color: white;
-    text-decoration: none;
-}
-
-.headergroup th a:hover {
-    background-color: #555;
-}
-
 .language-selector select {
     padding: 5px 8px;
     font-size: 16px;
     border-radius: 4px;
+}
+
+/* ===============================
+   ナビゲーション（uw01〜uw04）
+   =============================== */
+
+.headergroup table {
+    width: 100%;
+    background-color: #ffffff;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.headergroup th {
+    padding: 0;
+}
+
+/* 通常リンク */
+.headergroup th a {
+    display: block;
+    padding: 12px 10px;
+    color: #000;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+/* hover（控えめ） */
+.headergroup th a:hover {
+    background-color: #f2f2f2;
+}
+
+/* ★ 現在ページ（下線のみ） */
+.headergroup table tr th a.active {
+    border-bottom: 3px solid #e2d0d0 !important;
+    font-weight: bold;
 }

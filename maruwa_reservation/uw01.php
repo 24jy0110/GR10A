@@ -21,7 +21,10 @@
 </head>
 <body>
 
-<?php include("includes/header.php"); ?>
+<?php
+$currentPage = 'uw01';
+include('includes/header.php');
+?>
 
 <div class="content-box">
     <h2>利用方法</h2>

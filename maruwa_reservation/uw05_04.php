@@ -1,9 +1,19 @@
 <?php
 session_start();
 
-/* ===============================
-   SESSION チェック
-================================ */
+/* =================================================
+   0503 → 0504：顧客情報を SESSION に保存
+================================================= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_SESSION['reserve']['customer_name']      = $_POST['customer_name'] ?? '';
+    $_SESSION['reserve']['customer_name_kana'] = $_POST['customer_name_kana'] ?? '';
+    $_SESSION['reserve']['customer_email']     = $_POST['customer_email'] ?? '';
+    $_SESSION['reserve']['customer_phone']     = $_POST['customer_phone'] ?? '';
+}
+
+/* =================================================
+   SESSION チェック（0503 未経由防止）
+================================================= */
 if (
     empty($_SESSION['reserve']['customer_name']) ||
     empty($_SESSION['reserve']['car_type'])
@@ -13,6 +23,35 @@ if (
 }
 
 $res = $_SESSION['reserve'];
+
+/* =================================================
+   表示用データ整形
+================================================= */
+// 予約日付
+$dateText = $res['start_date'];
+if (!empty($res['start_time'])) {
+    $dateText .= ' ' . $res['start_time'];
+}
+if (!empty($res['end_date'])) {
+    $dateText .= ' ～ ' . $res['end_date'];
+}
+
+// 乗車・降車場所
+$pickupText =
+    ($res['pickup_area'] ?? '') . ' ' .
+    ($res['pickup_city'] ?? '') . ' ' .
+    ($res['pickup_detail'] ?? '');
+
+$dropText =
+    ($res['drop_area'] ?? '') . ' ' .
+    ($res['drop_city'] ?? '') . ' ' .
+    ($res['drop_detail'] ?? '');
+
+// 対応言語
+$langText = $res['lang1'];
+if (!empty($res['lang2'])) {
+    $langText .= ' / ' . $res['lang2'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -24,7 +63,7 @@ $res = $_SESSION['reserve'];
 <style>
 .container {
   max-width: 900px;
-  margin: 40px auto;
+  margin: 40px auto 60px;
   padding: 0 20px;
 }
 
@@ -42,7 +81,7 @@ h2 {
 .confirm-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .confirm-table th,
@@ -54,20 +93,21 @@ h2 {
 
 .confirm-table th {
   width: 220px;
-  background-color: #f8f8f8;
   text-align: left;
+  background: #f5f5f5;
 }
 
 .button-row {
   display: flex;
   justify-content: space-between;
+  gap: 30px;
   margin-top: 40px;
 }
 
 .btn-back,
 .btn-next {
-  width: 200px;
-  padding: 12px 0;
+  width: 220px;
+  padding: 14px 0;
   font-size: 16px;
   cursor: pointer;
 }
@@ -92,6 +132,7 @@ h2 {
 <div class="container">
 
 <h2>ご予約内容をご確認ください。</h2>
+
 <p class="note">
 ご予約内容は30分間お取り置きしております。<br>
 30分以内にお手続きを完了してください。<br>
@@ -101,95 +142,62 @@ h2 {
 <table class="confirm-table">
 <tr>
   <th>予約日付</th>
-  <td>
-    <?php
-      echo htmlspecialchars(
-        $res['start_date'] . ' ' . ($res['start_time'] ?? '') .
-        (!empty($res['end_date']) ? ' ～ ' . $res['end_date'] : ''),
-        ENT_QUOTES,
-        'UTF-8'
-      );
-    ?>
-  </td>
+  <td><?= htmlspecialchars($dateText, ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>乗車人数</th>
-  <td><?php echo htmlspecialchars($res['people'], ENT_QUOTES, 'UTF-8'); ?> 名</td>
+  <td><?= htmlspecialchars($res['people'], ENT_QUOTES) ?> 名</td>
 </tr>
 
 <tr>
   <th>車種</th>
-  <td><?php echo htmlspecialchars($res['car_type'], ENT_QUOTES, 'UTF-8'); ?></td>
+  <td><?= htmlspecialchars($res['car_type'], ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>乗車場所</th>
-  <td>
-    <?php
-      echo htmlspecialchars(
-        $res['pickup_area'] . ' ' . $res['pickup_city'] . ' ' . $res['pickup_detail'],
-        ENT_QUOTES,
-        'UTF-8'
-      );
-    ?>
-  </td>
+  <td><?= htmlspecialchars($pickupText, ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>降車場所</th>
-  <td>
-    <?php
-      echo htmlspecialchars(
-        $res['drop_area'] . ' ' . $res['drop_city'] . ' ' . $res['drop_detail'],
-        ENT_QUOTES,
-        'UTF-8'
-      );
-    ?>
-  </td>
+  <td><?= htmlspecialchars($dropText, ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>対応言語</th>
-  <td>
-    <?php
-      echo htmlspecialchars(
-        $res['lang1'] . (!empty($res['lang2']) ? ' / ' . $res['lang2'] : ''),
-        ENT_QUOTES,
-        'UTF-8'
-      );
-    ?>
-  </td>
+  <td><?= htmlspecialchars($langText, ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>※サービス開始時間</th>
-  <td><?php echo htmlspecialchars($res['start_time'], ENT_QUOTES, 'UTF-8'); ?></td>
+  <td><?= htmlspecialchars($res['start_time'], ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>利用料金</th>
-  <td><?php echo number_format($res['car_price']); ?> 円／日</td>
+  <td><?= number_format($res['car_price']) ?> 円／日</td>
 </tr>
 
 <tr>
   <th>お客様名前</th>
-  <td><?php echo htmlspecialchars($res['customer_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+  <td><?= htmlspecialchars($res['customer_name'], ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>お客様名前（カタカナ）</th>
-  <td><?php echo htmlspecialchars($res['customer_name_kana'], ENT_QUOTES, 'UTF-8'); ?></td>
+  <td><?= htmlspecialchars($res['customer_name_kana'], ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>メールアドレス</th>
-  <td><?php echo htmlspecialchars($res['customer_email'], ENT_QUOTES, 'UTF-8'); ?></td>
+  <td><?= htmlspecialchars($res['customer_email'], ENT_QUOTES) ?></td>
 </tr>
 
 <tr>
   <th>電話番号</th>
-  <td><?php echo htmlspecialchars($res['customer_phone'], ENT_QUOTES, 'UTF-8'); ?></td>
+  <td><?= htmlspecialchars($res['customer_phone'], ENT_QUOTES) ?></td>
 </tr>
 </table>
 

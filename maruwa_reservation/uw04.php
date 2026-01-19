@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -67,20 +68,21 @@
             font-size: 16px;
         }
 
-       
-    .back-row {
-      text-align: center;
-      padding: 30px 0;
-    }
 
-    .btn-back {
-      display: inline-block;
-      padding: 10px 24px;
-      border: 1px solid #000;
-      color: #000;
-      text-decoration: none;
-      border-radius: 4px;
-    }
+        .back-row {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 10px 24px;
+            border: 1px solid #000;
+            color: #000;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
         .btn-back:hover {
             background-color: #f5f5f5;
         }
@@ -89,52 +91,55 @@
 
 <body>
 
-<?php include("includes/header.php"); ?>
+    <?php
+    $currentPage = 'uw04';
+    include('includes/header.php');
+    ?>
+    <div class="price-wrapper">
+        <div class="price-title">日貸し（1日単位）の参考料金設定案</div>
+        <div class="price-note">
+            ※いずれも《車両＋専属ドライバー＋燃料＋保険込み》／
+            高速代・駐車料・宿泊費は<span class="red">別途</span>
+        </div>
 
-<div class="price-wrapper">
-    <div class="price-title">日貸し（1日単位）の参考料金設定案</div>
-    <div class="price-note">
-        ※いずれも《車両＋専属ドライバー＋燃料＋保険込み》／
-        高速代・駐車料・宿泊費は<span class="red">別途</span>
+        <!-- 表头 -->
+        <div class="price-grid">
+            <div class="price-header">車種</div>
+            <div class="price-header">1日基本料金（税込）<br>日本語対応</div>
+            <div class="price-header">1日基本料金（税込）<br>外国語対応</div>
+
+            <!-- Crown -->
+            <div class="car-box">
+                <img src="imgs/crown.jpg" alt="トヨタ Crown">
+                <div class="car-name">トヨタ Crown</div>
+            </div>
+            <div class="price-cell">65,000円</div>
+            <div class="price-cell">73,000円</div>
+
+            <!-- Alphard -->
+            <div class="car-box">
+                <img src="imgs/alphard.jpg" alt="トヨタ Alphard">
+                <div class="car-name">トヨタ Alphard</div>
+            </div>
+            <div class="price-cell">70,000円</div>
+            <div class="price-cell">78,000円</div>
+
+            <!-- Hiace -->
+            <div class="car-box">
+                <img src="imgs/HIACE.png" alt="トヨタ Hiace">
+                <div class="car-name">トヨタ Hiace</div>
+            </div>
+            <div class="price-cell">75,000円</div>
+            <div class="price-cell">83,000円</div>
+        </div>
+
+        <div class="back-row">
+            <a href="index.php" class="btn-back">ホームページへ</a>
+        </div>
     </div>
 
-    <!-- 表头 -->
-    <div class="price-grid">
-        <div class="price-header">車種</div>
-        <div class="price-header">1日基本料金（税込）<br>日本語対応</div>
-        <div class="price-header">1日基本料金（税込）<br>外国語対応</div>
-
-        <!-- Crown -->
-        <div class="car-box">
-            <img src="imgs/crown.jpg" alt="トヨタ Crown">
-            <div class="car-name">トヨタ Crown</div>
-        </div>
-        <div class="price-cell">65,000円</div>
-        <div class="price-cell">73,000円</div>
-
-        <!-- Alphard -->
-        <div class="car-box">
-            <img src="imgs/alphard.jpg" alt="トヨタ Alphard">
-            <div class="car-name">トヨタ Alphard</div>
-        </div>
-        <div class="price-cell">70,000円</div>
-        <div class="price-cell">78,000円</div>
-
-        <!-- Hiace -->
-        <div class="car-box">
-            <img src="imgs/HIACE.png" alt="トヨタ Hiace">
-            <div class="car-name">トヨタ Hiace</div>
-        </div>
-        <div class="price-cell">75,000円</div>
-        <div class="price-cell">83,000円</div>
-    </div>
-
-    <div class="back-row">
-        <a href="index.php" class="btn-back">ホームページへ</a>
-    </div>
-</div>
-
-<?php include("includes/footer.php"); ?>
+    <?php include("includes/footer.php"); ?>
 
 </body>
+
 </html>
