@@ -2,9 +2,25 @@
 session_start();
 
 /* ===============================
-   セッションチェック
+   POST：客户信息保存 → 0504
 ================================ */
-if (empty($_SESSION['reserve'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_SESSION['reserve']['customer_name']       = $_POST['customer_name'] ?? '';
+    $_SESSION['reserve']['customer_name_kana']  = $_POST['customer_name_kana'] ?? '';
+    $_SESSION['reserve']['customer_email']      = $_POST['customer_email'] ?? '';
+    $_SESSION['reserve']['customer_phone']      = $_POST['customer_phone'] ?? '';
+
+    header('Location: uw05_04.php');
+    exit;
+}
+
+/* ===============================
+   SESSION チェック
+================================ */
+if (
+    empty($_SESSION['reserve']['car_model_name']) ||
+    empty($_SESSION['reserve']['car_model_use_fee'])
+) {
     header('Location: index.php');
     exit;
 }
@@ -12,190 +28,60 @@ if (empty($_SESSION['reserve'])) {
 $res = $_SESSION['reserve'];
 
 /* ===============================
-   表示用データ整形
+   表示用整形
 ================================ */
-// 予約日付
 $dateText = $res['start_date'];
-if (!empty($res['start_time'])) {
-    $dateText .= ' ' . $res['start_time'];
-}
-if (!empty($res['end_date'])) {
-    $dateText .= ' ～ ' . $res['end_date'];
-}
+if (!empty($res['start_time'])) $dateText .= ' ' . $res['start_time'];
+if (!empty($res['end_date']))   $dateText .= ' ～ ' . $res['end_date'];
 
-// 乗車・降車場所
-$pickupText =
-    ($res['pickup_area'] ?? '') . ' ' .
-    ($res['pickup_city'] ?? '') . ' ' .
-    ($res['pickup_detail'] ?? '');
+$pickupText = "{$res['pickup_area']} {$res['pickup_city']} {$res['pickup_detail']}";
+$dropText   = "{$res['drop_area']} {$res['drop_city']} {$res['drop_detail']}";
 
-$dropText =
-    ($res['drop_area'] ?? '') . ' ' .
-    ($res['drop_city'] ?? '') . ' ' .
-    ($res['drop_detail'] ?? '');
-
-// 対応言語
-$langText = $res['lang1'] ?? '';
-if (!empty($res['lang2'])) {
-    $langText .= ' / ' . $res['lang2'];
-}
+$langText = $res['lang1'];
+if (!empty($res['lang2'])) $langText .= ' / ' . $res['lang2'];
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>予約内容確認 | 丸和交通株式会社</title>
+<title>予約内容確認・個人情報入力</title>
 <link rel="stylesheet" href="./assets/app.css">
-
-<style>
-.container {
-    max-width: 900px;
-    margin: 40px auto 60px;
-    padding: 0 20px;
-}
-h2 {
-    margin-bottom: 10px;
-}
-.notice {
-    font-size: 14px;
-    margin-bottom: 20px;
-}
-.confirm-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 40px;
-}
-.confirm-table th,
-.confirm-table td {
-    border: 1px solid #000;
-    padding: 10px;
-    font-size: 15px;
-}
-.confirm-table th {
-    width: 220px;
-    text-align: left;
-    background: #f5f5f5;
-}
-.form-box {
-    border: 1px solid #000;
-    padding: 20px;
-    margin-bottom: 40px;
-}
-.form-box h3 {
-    margin-top: 0;
-}
-.form-box table {
-    width: 100%;
-}
-.form-box th {
-    text-align: left;
-    width: 220px;
-    padding: 10px 0;
-}
-.form-box input {
-    width: 100%;
-    max-width: 360px;
-    padding: 6px 8px;
-}
-.button-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
-.btn-back,
-.btn-next {
-    flex: 1;
-    padding: 14px 0;
-    font-size: 18px;
-    cursor: pointer;
-}
-.btn-next {
-    background: #000;
-    color: #fff;
-}
-</style>
 </head>
 
 <body>
-
 <?php include("includes/header.php"); ?>
 
 <div class="container">
 
-<h2>ご予約内容をご確認ください。</h2>
-<p class="notice">
-ご予約内容は30分間お取り置きしております。<br>
-30分以内にお手続きを完了してください。
-</p>
+<h2>予約内容確認</h2>
 
-<!-- 上：予約内容確認 -->
 <table class="confirm-table">
-<tr>
-    <th>予約日付</th>
-    <td><?= htmlspecialchars($dateText, ENT_QUOTES) ?></td>
-</tr>
-<tr>
-    <th>乗車人数</th>
-    <td><?= htmlspecialchars($res['people'], ENT_QUOTES) ?> 名</td>
-</tr>
-<tr>
-    <th>車種</th>
-    <td><?= htmlspecialchars($res['car_type'], ENT_QUOTES) ?></td>
-</tr>
-<tr>
-    <th>乗車場所</th>
-    <td><?= htmlspecialchars($pickupText, ENT_QUOTES) ?></td>
-</tr>
-<tr>
-    <th>降車場所</th>
-    <td><?= htmlspecialchars($dropText, ENT_QUOTES) ?></td>
-</tr>
-<tr>
-    <th>対応言語</th>
-    <td><?= htmlspecialchars($langText, ENT_QUOTES) ?></td>
-</tr>
-<tr>
-    <th>利用料金</th>
-    <td><?= htmlspecialchars($res['price'], ENT_QUOTES) ?> 円／日</td>
-</tr>
+<tr><th>予約日付</th><td><?= htmlspecialchars($dateText) ?></td></tr>
+<tr><th>乗車人数</th><td><?= $res['people'] ?> 名</td></tr>
+<tr><th>車種</th><td><?= htmlspecialchars($res['car_model_name']) ?></td></tr>
+<tr><th>乗車場所</th><td><?= htmlspecialchars($pickupText) ?></td></tr>
+<tr><th>降車場所</th><td><?= htmlspecialchars($dropText) ?></td></tr>
+<tr><th>対応言語</th><td><?= htmlspecialchars($langText) ?></td></tr>
+<tr><th>利用料金</th><td><?= number_format($res['car_model_use_fee']) ?> 円／日</td></tr>
 </table>
 
-<!-- 下：お客様情報入力 -->
-<form method="post" action="uw05_04.php">
+<h3>お客様情報入力</h3>
 
-<div class="form-box">
-<h3>ご予約に必要な情報をご入力ください。</h3>
-
-<table>
-<tr>
-    <th>お客様名前 *</th>
-    <td><input type="text" name="customer_name" required></td>
-</tr>
-<tr>
-    <th>お客様名前（カタカナ）</th>
-    <td><input type="text" name="customer_name_kana"></td>
-</tr>
-<tr>
-    <th>メールアドレス *</th>
-    <td><input type="email" name="customer_email" required></td>
-</tr>
-<tr>
-    <th>電話番号 *</th>
-    <td><input type="tel" name="customer_phone" required></td>
-</tr>
+<form method="post">
+<table class="form-table">
+<tr><th>お名前 *</th><td><input name="customer_name" required></td></tr>
+<tr><th>カタカナ</th><td><input name="customer_name_kana"></td></tr>
+<tr><th>メール *</th><td><input type="email" name="customer_email" required></td></tr>
+<tr><th>電話番号 *</th><td><input name="customer_phone" required></td></tr>
 </table>
-</div>
 
 <div class="button-row">
-    <button type="button" class="btn-back" onclick="history.back()">戻る</button>
-    <button type="submit" class="btn-next">予約を確定する</button>
+  <button type="submit" class="btn-next">次へ</button>
 </div>
-
 </form>
 
 </div>
 
 <?php include("includes/footer.php"); ?>
-
 </body>
 </html>
