@@ -1,0 +1,119 @@
+/* ==========================================================
+   共通設定（全ページ共通で適用）
+   ========================================================== */
+
+/* すべてのページに統一フォントを設定 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background-color: #ffffff;
+    color: #222;
+    box-sizing: border-box;
+}
+
+/* 全体のリンクスタイル（デフォルト） */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* リセット：画像 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* テーブルの基本整形 */
+table {
+    border-collapse: collapse;
+}
+
+/* ボタン共通（各ページで上書き可能） */
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* input & select 共通 */
+input,
+select,
+textarea {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+/* ページ全体の中央揃えユーティリティ */
+.center {
+    text-align: center;
+}
+
+/* 余白ユーティリティ（必要に応じて使用） */
+.mt20 { margin-top: 20px; }
+.mt40 { margin-top: 40px; }
+.mt60 { margin-top: 60px; }
+
+.mb20 { margin-bottom: 20px; }
+.mb40 { margin-bottom: 40px; }
+.mb60 { margin-bottom: 60px; }
+
+/* Flex utilities（レイアウト調整用） */
+.flex {
+    display: flex;
+}
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* コンテンツ最大幅（内部管理画面で使用） */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* エラーメッセージの統一ルール */
+.error-message {
+    color: #d20000;
+    font-size: 15px;
+    margin-top: 10px;
+}
+
+/* 成功メッセージ（必要なら使用） */
+.success-message {
+    color: #008000;
+    font-size: 15px;
+    margin-top: 10px;
+}
+
+/* ボタンの共通フォーマット */
+.btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: none;
+    font-size: 16px;
+}
+.btn-primary {
+    background: #000;
+    color: #fff;
+}
+.btn-primary:hover {
+    opacity: 0.85;
+}
+.btn-secondary {
+    background: #555;
+    color: #fff;
+}
+
+/* 全ページに安定した余白を確保（headerの下） */
+.page-content {
+    margin-top: 120px; /* Headerと重ならないように */
+}
