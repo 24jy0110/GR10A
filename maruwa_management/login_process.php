@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/db_connect.php'; 
+require_once __DIR__ . '/db_connect.php';
 
 $employee_id = strtoupper(trim(mb_convert_kana($_POST['employee_id'] ?? "", "as")));
 $password    = trim($_POST['password'] ?? "");
@@ -9,7 +9,7 @@ if ($employee_id === "" || $password === "") {
     header("Location: index.php?error=1");
     exit;
 }
-//社員検索
+
 
 $sql = "SELECT employee_id, employee_name, password
         FROM employee 
@@ -19,8 +19,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->bindValue(":eid", $employee_id, PDO::PARAM_STR);
 $stmt->execute();
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-//社員ID が存在しない
 
 if (!$user) {
     header("Location: index.php?error=1");
@@ -34,6 +32,7 @@ if ($password !== $user['password']) {
 }
 
 
+$job_code = substr($employee_id, 8, 2);
 $_SESSION['employee_id']   = $user['employee_id'];
 $_SESSION['employee_name'] = $user['employee_name'];
 $_SESSION['job_code']      = $job_code;
