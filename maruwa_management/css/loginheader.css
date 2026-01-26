@@ -1,0 +1,62 @@
+/* ==========================================================
+   ログイン後ヘッダー（左ロゴ・右ユーザー情報）
+========================================================== */
+
+.login-header {
+    width: 100%;
+    height: 100px;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between; /* 左と右を完全に分ける */
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 左側（会社名） */
+.header-left {
+    line-height: 1.4;
+}
+
+.company-name {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+.company-eng {
+    margin: 0;
+    font-size: 12px;
+}
+.company-msg {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #444;
+}
+
+/* ======================
+   右上（ユーザー情報）
+====================== */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-info span {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* ログアウトボタン */
+.logout-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.logout-btn:hover {
+    opacity: 0.8;
+}

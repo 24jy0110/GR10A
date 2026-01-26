@@ -19,8 +19,8 @@ if (isset($_GET['error'])) {
     <title>内部管理システム | ログイン</title>
 
     <!-- 必要なCSS -->
-    <link rel="stylesheet" href="./css/header.css">
-    <link rel="stylesheet" href="./css/login.css">
+    <link rel="stylesheet" href="assets/css/header.css">
+    <link rel="stylesheet" href="login.css">
 
 </head>
 <body>
@@ -52,8 +52,7 @@ if (isset($_GET['error'])) {
         </form>
 
         <p class="notice">
-        社員IDまたはパスワードを忘れた場合は、管理者へお問い合わせください。
-
+            社員ID または パスワードを忘れた場合は、システム管理者へお問い合わせください。
         </p>
 
     </div>
