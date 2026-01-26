@@ -19,8 +19,8 @@ if (isset($_GET['error'])) {
     <title>内部管理システム | ログイン</title>
 
     <!-- 必要なCSS -->
-    <link rel="stylesheet" href="assets/css/header.css">
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/login.css">
 
 </head>
 <body>
