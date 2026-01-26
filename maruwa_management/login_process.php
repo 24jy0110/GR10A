@@ -5,7 +5,7 @@ session_start();
    DB接続
    このファイルを読み込むと $pdo が使えるようになる
 ---------------------------------------------------------- */
-require_once __DIR__ . "/db_connect.php";
+require_once __DIR__ . '/db_connect.php';
 
 /* ---------- 入力値取得 ---------- */
 $employee_id = $_POST['employee_id'] ?? '';
@@ -28,10 +28,11 @@ if (!$user) {
 }
 
 /* ---------- パスワードエラー ---------- */
-if (!password_verify($password, $user['password'])) {
+if ($password !== $user['password']) {
     header("Location: index.php?error=password");
     exit;
 }
+
 
 /* ---------- 職種コード抽出（EMPLyyyyaaxxx） ---------- */
 $job_code = substr($employee_id, 8, 2);

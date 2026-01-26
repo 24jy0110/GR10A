@@ -1,8 +1,7 @@
 <!-- login header -->
-<link rel="stylesheet" href="assets/css/header.css">
-<link rel="stylesheet" href="assets/css/common.css">
+<link rel="stylesheet" href="header.css">
 
-<div class="header login-header">
+<div class="login-header">
     <h1 class="company-name">丸和交通株式会社</h1>
     <p class="company-eng">maruwa transportation co., LTD.</p>
     <p class="company-msg">旅をつなぐ、笑顔を運ぶ。</p>
