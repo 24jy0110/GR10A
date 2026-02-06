@@ -78,9 +78,8 @@ $_SESSION['department_name']    = $department_name;
    職種別ページ遷移
 ---------------------------------------------------------- */
 switch ($job_code) {
-    case "01": header("Location: uw100.php"); break;
+    case "01": header("Location: ./maruwauw100.php"); break;
     case "02": header("Location: uw110.php"); break;
     case "03": header("Location: uw120.php"); break;
 }
-
 exit;

@@ -1,53 +1,30 @@
 /* ==========================================================
-   ログイン後ヘッダー（左ロゴ・右ユーザー情報）
+   ログイン後ヘッダー（絶対に左右に分かれる完全固定版）
 ========================================================== */
 
 .login-header {
-    width: 100%;
-    height: 100px;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between; /* 左と右を完全に分ける */
-    align-items: center;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-}
-
-/* 左側（会社名） */
-.header-left {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    text-align: left !important; /* ここが重要。絶対に左揃え */
     line-height: 1.4;
+    z-index: 100;
 }
 
-.company-name {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-}
-.company-eng {
-    margin: 0;
-    font-size: 12px;
-}
-.company-msg {
-    margin-top: 4px;
-    font-size: 11px;
-    color: #444;
-}
 
-/* ======================
-   右上（ユーザー情報）
-====================== */
+
+/* 右上用户信息（绝对固定在右上角） */
 .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    text-align: right;
+    padding-right: 20px;
+    font-size: 14px;
 }
 
 .user-info span {
     font-size: 14px;
-    white-space: nowrap;
 }
 
-/* ログアウトボタン */
+/* 退出按钮 */
 .logout-btn {
     padding: 6px 14px;
     font-size: 13px;
@@ -58,5 +35,5 @@
     cursor: pointer;
 }
 .logout-btn:hover {
-    opacity: 0.8;
+    opacity: .85;
 }
