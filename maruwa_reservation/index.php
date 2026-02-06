@@ -105,8 +105,8 @@ session_start();
         <label data-key="modal_label_start_time">開始時間:</label>
         <input type="time" id="startTime">
 
-        <label data-key="modal_label_end_date">終了日（任意）:</label>
-        <input type="date" id="endDate">
+        <label data-key="modal_label_end_date">終了日:</label>
+        <input type="date" id="endDate" required>
 
         <p class="note">
             ※ご予約は本日から<strong>3日後</strong>以降のみ可能です。<br>
@@ -174,15 +174,18 @@ document.getElementById('confirmBtn').onclick = function(e) {
     const startTimeVal = startTime.value;
     const end       = endDate.value;
 
-    const dict = window.translations ? window.translations[window.currentLang] : null;
-
     if (!start) {
-        alert(dict ? dict['alert_start_date_missing'] : "開始日を選択してください。");
+        alert("開始日を選択してください。");
         return;
     }
 
-    if (end && end < start) {
-        alert(dict ? dict['alert_end_date_invalid'] : "終了日は開始日以降を選択してください。");
+    if (!end) {
+        alert("終了日を選択してください。");
+        return;
+    }
+
+    if (end < start) {
+        alert("終了日は開始日以降を選択してください。");
         return;
     }
 
@@ -197,6 +200,7 @@ document.getElementById('confirmBtn').onclick = function(e) {
 
     document.getElementById('reserveForm').submit();
 };
+
 </script>
 
 </body>

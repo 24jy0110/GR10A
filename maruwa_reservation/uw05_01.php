@@ -4,15 +4,17 @@ require_once __DIR__ . '/includes/area_master.php';
 
 /*
 |--------------------------------------------------------------------------
-| STEP0: 从 index.php 接收日期
+| STEP0: index.php から日付を受け取る
 |--------------------------------------------------------------------------
 */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_date']) && !isset($_POST['step'])) {
+
     $_SESSION['reserve'] = [
         'start_date' => $_POST['start_date'],
         'start_time' => $_POST['start_time'] ?? '',
         'end_date'   => $_POST['end_date']   ?? '',
     ];
+
 } else {
     if (empty($_SESSION['reserve']['start_date'])) {
         header('Location: index.php');
@@ -20,28 +22,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_date']) && !iss
     }
 }
 
+/* ★ NEW 必須チェック：終了日が未設定なら戻す */
+if (empty($_SESSION['reserve']['end_date'])) {
+    header('Location: index.php');
+    exit;
+}
+
 /*
 |--------------------------------------------------------------------------
-| STEP1: 本页面提交
+| STEP1: フォーム送信 → SESSION 保存 → 0502
 |--------------------------------------------------------------------------
 */
 if (isset($_POST['step']) && $_POST['step'] === 'condition') {
 
-    $_SESSION['reserve']['people']        = $_POST['people'];
-    $_SESSION['reserve']['wheelchair']    = $_POST['wheelchair'];
+    /* 人数 */
+    $_SESSION['reserve']['ride_count'] = $_POST['ride_count'];
 
+    /* 乗車場所 */
     $_SESSION['reserve']['pickup_pref']   = $_POST['pickup_pref'];
     $_SESSION['reserve']['pickup_city']   = $_POST['pickup_city'];
     $_SESSION['reserve']['pickup_detail'] = $_POST['pickup_detail'];
 
+    /* 降車場所 */
     $_SESSION['reserve']['drop_pref']     = $_POST['drop_pref'];
     $_SESSION['reserve']['drop_city']     = $_POST['drop_city'];
     $_SESSION['reserve']['drop_detail']   = $_POST['drop_detail'];
 
-    $_SESSION['reserve']['lang1']          = $_POST['lang1'];
-    $_SESSION['reserve']['lang2']          = $_POST['lang2'];
+    /* 言語 → LCAT 外部キー */
+    $_SESSION['reserve']['lang_pref_1'] = $_POST['lang_pref_1'];
+    $_SESSION['reserve']['lang_pref_2'] = ($_POST['lang_pref_2'] === 'NONE' || $_POST['lang_pref_2'] === '') 
+                                            ? null 
+                                            : $_POST['lang_pref_2'];
 
-    // === 営業所自動判定（乗車場所 기준）===
+    /* 営業所自動判定 */
     $officeCode = '';
     foreach ($AREA_MASTER[$_POST['pickup_pref']] as $ofc => $cities) {
         if (in_array($_POST['pickup_city'], $cities, true)) {
@@ -57,13 +70,15 @@ if (isset($_POST['step']) && $_POST['step'] === 'condition') {
 
 /*
 |--------------------------------------------------------------------------
-| 表示用日期
+| 表示用：予約日付
 |--------------------------------------------------------------------------
 */
 $res = $_SESSION['reserve'];
+
 $dateText = $res['start_date'];
 if (!empty($res['start_time'])) $dateText .= ' ' . $res['start_time'];
 if (!empty($res['end_date']))   $dateText .= ' ～ ' . $res['end_date'];
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -72,15 +87,15 @@ if (!empty($res['end_date']))   $dateText .= ' ～ ' . $res['end_date'];
 <title>予約条件入力 | 丸和交通株式会社</title>
 <link rel="stylesheet" href="./assets/app.css">
 <style>
-.container{max-width:960px;margin:40px auto;padding:0 20px}
-.reserve-date{font-size:20px;font-weight:bold;margin-bottom:30px}
-table{width:100%;border-collapse:collapse}
-th,td{padding:12px;font-size:16px;vertical-align:top}
-th{text-align:left;width:220px}
-select,input{width:100%;max-width:360px;padding:6px}
-.button-row{margin-top:40px;display:flex;gap:20px}
-.btn-next{background:#000;color:#fff;padding:14px;font-size:18px;flex:1}
-.btn-cancel{padding:14px;font-size:18px;flex:1}
+.container {max-width:960px;margin:40px auto;padding:0 20px}
+.reserve-date {font-size:20px;font-weight:bold;margin-bottom:30px}
+table {width:100%;border-collapse:collapse}
+th,td {padding:12px;font-size:16px;vertical-align:top}
+th {text-align:left;width:220px}
+select,input {width:100%;max-width:360px;padding:6px}
+.button-row {margin-top:40px;display:flex;gap:20px}
+.btn-next {background:#000;color:#fff;padding:14px;font-size:18px;flex:1}
+.btn-cancel {padding:14px;font-size:18px;flex:1}
 </style>
 </head>
 
@@ -88,32 +103,23 @@ select,input{width:100%;max-width:360px;padding:6px}
 <?php include 'includes/header.php'; ?>
 
 <div class="container">
+
   <div class="reserve-date">
-    予約日付　<?= htmlspecialchars($dateText, ENT_QUOTES) ?>
+    予約日付：<?= htmlspecialchars($dateText, ENT_QUOTES) ?>
   </div>
 
   <form method="post">
     <input type="hidden" name="step" value="condition">
 
     <table>
+
+      <!-- 人数 -->
       <tr>
         <th>乗客人数</th>
-        <td><input type="number" name="people" min="1" max="9" required></td>
+        <td><input type="number" name="ride_count" min="1" max="9" required></td>
       </tr>
 
-      <tr>
-        <th>車椅子／ベビーカー</th>
-        <td>
-          <select name="wheelchair" required>
-            <option value="なし">なし</option>
-            <option value="車椅子">車椅子あり</option>
-            <option value="ベビーカー">ベビーカーあり</option>
-            <option value="両方">両方あり</option>
-          </select>
-        </td>
-      </tr>
-
-      <!-- 乗車 -->
+      <!-- 乗車場所 -->
       <tr>
         <th>乗車場所</th>
         <td>
@@ -132,7 +138,7 @@ select,input{width:100%;max-width:360px;padding:6px}
         </td>
       </tr>
 
-      <!-- 降車 -->
+      <!-- 降車場所 -->
       <tr>
         <th>降車場所</th>
         <td>
@@ -151,30 +157,40 @@ select,input{width:100%;max-width:360px;padding:6px}
         </td>
       </tr>
 
+      <!-- 言語（LCAT 外部キー） -->
       <tr>
         <th>対応言語</th>
         <td>
-          <select name="lang1" required>
+          <select name="lang_pref_1" required>
             <option value="">第一希望</option>
-            <option>日本語</option>
-            <option>英語</option>
-            <option>中国語</option>
-            <option>韓国語</option>
+            <option value="LCAT02">英語</option>
+            <option value="LCAT03">中国語</option>
+            <option value="LCAT04">韓国語</option>
+            <option value="LCAT05">ドイツ語</option>
+            <option value="LCAT06">スペイン語</option>
+            <option value="LCAT07">フランス語</option>
           </select>
-          <select name="lang2">
+
+          <select name="lang_pref_2">
             <option value="">第二希望（任意）</option>
-            <option>日本語</option>
-            <option>英語</option>
-            <option value="なし">なし</option>
+            <option value="LCAT02">英語</option>
+            <option value="LCAT03">中国語</option>
+            <option value="LCAT04">韓国語</option>
+            <option value="LCAT05">ドイツ語</option>
+            <option value="LCAT06">スペイン語</option>
+            <option value="LCAT07">フランス語</option>
+            <option value="NONE">なし</option>
           </select>
         </td>
       </tr>
+
     </table>
 
     <div class="button-row">
       <button type="button" class="btn-cancel" onclick="location.href='index.php'">取消</button>
       <button type="submit" class="btn-next">次へ</button>
     </div>
+
   </form>
 </div>
 
@@ -188,8 +204,8 @@ function bind(prefSel, citySel){
     citySel.innerHTML = '<option value="">市区町村</option>';
     if (!AREA_MASTER[prefSel.value]) return;
     Object.values(AREA_MASTER[prefSel.value]).flat().forEach(c=>{
-      const o=document.createElement('option');
-      o.value=o.textContent=c;
+      const o = document.createElement('option');
+      o.value = o.textContent = c;
       citySel.appendChild(o);
     });
   };
