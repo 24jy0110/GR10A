@@ -1,195 +1,202 @@
 <?php
 session_start();
 
-/* ===============================
-   SESSION チェック
-================================ */
-if (empty($_SESSION['reserve'])) {
-    header('Location: index.php');
-    exit;
+/* ============================================================
+   SESSION 必要データチェック
+============================================================ */
+$required = [
+    'start_date',
+    'end_date',
+    'start_time',
+    'ride_count',
+    'pickup_pref',
+    'pickup_city',
+    'pickup_detail',
+    'drop_pref',
+    'drop_city',
+    'drop_detail',
+    'car_model_code',        // ★ 追加必須
+    'car_model_name',
+    'car_model_use_fee',
+    'customer_name',
+    'customer_email',
+    'customer_phone',
+    'sales_office_code'
+];
+
+foreach ($required as $key) {
+    if (!isset($_SESSION['reserve'][$key])) {
+        header("Location: uw05_01.php");
+        exit;
+    }
 }
 
 $res = $_SESSION['reserve'];
 
-/* ===============================
+/* ============================================================
    DB 接続
-================================ */
-$dsn = 'mysql:host=localhost;dbname=24jy0141;charset=utf8mb4';
-$user = 'root';
-$pass = '';
+============================================================ */
+require_once __DIR__ . '/includes/db_connect.php';
 
-try {
-    $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
-} catch (PDOException $e) {
-    die('DB接続エラー：' . $e->getMessage());
-}
+/* ============================================================
+   予約番号（yymmdd + 3桁連番）
+============================================================ */
+$today = date("ymd");
 
-/* ===============================
-   予約番号生成（yymmdd + 連番）
-================================ */
-$today = date('ymd');
-
-$stmt = $pdo->prepare(
-    "SELECT COUNT(*) FROM reservation WHERE reservation_number LIKE :prefix"
-);
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM reservation 
+    WHERE reservation_number LIKE :prefix
+");
 $stmt->execute([':prefix' => $today . '%']);
 $count = $stmt->fetchColumn() + 1;
 
 $reservationNumber = $today . str_pad($count, 3, '0', STR_PAD_LEFT);
 
-/* ===============================
-   データ整形
-================================ */
-$rideLocation =
-    $res['pickup_pref'] . ' ' .
-    $res['pickup_city'] . ' ' .
-    $res['pickup_detail'];
+/* ============================================================
+   利用日数 × 単価 → 料金計算
+============================================================ */
+$start = new DateTime($res['start_date']);
+$end   = new DateTime($res['end_date']);
 
-$dropLocation =
-    $res['drop_pref'] . ' ' .
-    $res['drop_city'] . ' ' .
-    $res['drop_detail'];
+$days = (int)$start->diff($end)->days + 1;
+$days = max(1, $days);
 
-$serviceStart = $res['start_date'] . ' ' . ($res['start_time'] ?: '07:00');
+$usageFee = $days * (int)$res['car_model_use_fee'];
 
-/* ===============================
-   INSERT
-================================ */
+/* ============================================================
+   表示用項目
+============================================================ */
+$rideLocation = trim("{$res['pickup_pref']} {$res['pickup_city']} {$res['pickup_detail']}");
+$dropLocation = trim("{$res['drop_pref']} {$res['drop_city']} {$res['drop_detail']}");
+
+$serviceStart = $res['start_date'] . " " . ($res['start_time'] ?: "07:00");
+$serviceEnd   = $res['end_date'];   // date only
+
+/* ============================================================
+   今は配車未確定 → 車両・ドライバーは NULL
+============================================================ */
+$numberPlate = null;
+$driverId    = null;
+
+/* ============================================================
+   INSERT 実行（★ car_model_code 追加済み）
+============================================================ */
 $sql = "
 INSERT INTO reservation (
-  reservation_number,
-  reservation_date,
-  ride_count,
-  ride_location,
-  drop_off_location,
-  service_start_time,
-  usage_fee,
-  customer_name,
-  customer_email,
-  customer_phone,
-  customer_name_kana,
-  lang_pref_1,
-  lang_pref_2,
-  state_code,
-  number_plate,
-  driver_id
+    reservation_number,
+    reservation_date,
+    ride_count,
+    car_model_code,       -- ★ 新規追加
+    ride_location,
+    drop_off_location,
+    service_start_time,
+    service_end_date,
+    usage_fee,
+    customer_name,
+    customer_email,
+    customer_phone,
+    customer_name_kana,
+    lang_pref_1,
+    lang_pref_2,
+    state_code,
+    sales_office_code,
+    number_plate,
+    driver_id
 ) VALUES (
-  :reservation_number,
-  :reservation_date,
-  :ride_count,
-  :ride_location,
-  :drop_off_location,
-  :service_start_time,
-  :usage_fee,
-  :customer_name,
-  :customer_email,
-  :customer_phone,
-  :customer_name_kana,
-  :lang_pref_1,
-  :lang_pref_2,
-  :state_code,
-  :number_plate,
-  :driver_id
-)";
+    :reservation_number,
+    :reservation_date,
+    :ride_count,
+    :car_model_code,      -- ★ 新規追加
+    :ride_location,
+    :drop_off_location,
+    :service_start_time,
+    :service_end_date,
+    :usage_fee,
+    :customer_name,
+    :customer_email,
+    :customer_phone,
+    :customer_name_kana,
+    :lang_pref_1,
+    :lang_pref_2,
+    'STC01',
+    :sales_office_code,
+    :number_plate,
+    :driver_id
+)
+";
+
 $stmt = $pdo->prepare($sql);
+
 $stmt->execute([
     ':reservation_number' => $reservationNumber,
-    ':reservation_date'   => $res['start_date'],
-    ':ride_count'         => $res['people'],
+    ':reservation_date'   => $res['start_date'],  // ★ ここ：開始日 = 予約日
+    ':ride_count'         => $res['ride_count'],
+    ':car_model_code'     => $res['car_model_code'], // ★ 重要
     ':ride_location'      => $rideLocation,
     ':drop_off_location'  => $dropLocation,
     ':service_start_time' => $serviceStart,
-    ':usage_fee'          => $res['car_price'],
+    ':service_end_date'   => $serviceEnd,
+    ':usage_fee'          => $usageFee,
     ':customer_name'      => $res['customer_name'],
     ':customer_email'     => $res['customer_email'],
     ':customer_phone'     => $res['customer_phone'],
-    ':customer_name_kana' => $res['customer_name_kana'],
-    ':lang_pref_1'        => $res['lang1'],
-    ':lang_pref_2'        => $res['lang2'],
-    ':state_code'         => 'TMP',          // 仮予約
-    ':number_plate'       => 'UNASSIGNED',
-    ':driver_id'          => 'UNASSIGNED'
+    ':customer_name_kana' => $res['customer_name_kana'] ?: null,
+    ':lang_pref_1'        => $res['lang_pref_1'],
+    ':lang_pref_2'        => $res['lang_pref_2'],
+    ':sales_office_code'  => $res['sales_office_code'],
+    ':number_plate'       => $numberPlate,   // NULL
+    ':driver_id'          => $driverId       // NULL
 ]);
-
-/* ===============================
-   仮予約メール送信
-================================ */
-$to = $res['customer_email'];
-$subject = '【丸和交通】仮予約受付のお知らせ';
-
-$message = <<<MAIL
-{$res['customer_name']} 様
-
-このたびは、丸和交通株式会社の観光ハイヤーサービスに
-お申し込みいただき、誠にありがとうございます。
-
-下記内容にて【仮予約】を受け付けいたしました。
-
-■ 仮予約番号
-{$reservationNumber}
-
-■ ご利用日
-{$serviceStart}
-
-■ 乗車場所
-{$rideLocation}
-
-■ 降車場所
-{$dropLocation}
-
-現在はまだ【仮予約】の状態です。
-車両およびドライバーの手配が完了次第、
-【本予約確定】のご連絡を差し上げます。
-
-ご不明な点がございましたら、下記までお問い合わせください。
-
-――――――――――――
-丸和交通株式会社 観光ハイヤー予約センター
-TEL：03-1234-5678（8:00〜22:00）
-MAIL：support@maruwa-taxi.jp
-――――――――――――
-
-MAIL;
-
-$headers = "From: support@maruwa-taxi.jp";
-
-mail($to, $subject, $message, $headers);
-
-/* ===============================
-   SESSION クリア（任意）
-================================ */
-// session_destroy();
 
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>仮予約完了 | 丸和交通株式会社</title>
+<title>仮予約を受け付けました | 丸和交通株式会社</title>
 <link rel="stylesheet" href="./assets/app.css">
+
 <style>
-.container {
-  max-width: 800px;
-  margin: 60px auto;
-  text-align: center;
+.body-area {
+    max-width: 850px;
+    margin: 40px auto 80px;
+    color: #111;
+    font-size: 17px;
+    line-height: 1.8;
 }
-.res-number {
-  font-size: 22px;
-  font-weight: bold;
-  margin: 20px 0;
+h1 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
-.note {
-  font-size: 14px;
-  line-height: 1.8;
+.red-note {
+    color: #d60000;
+    font-weight: bold;
 }
-.btn-home {
-  margin-top: 40px;
-  padding: 12px 40px;
-  border: 1px solid #000;
-  background: #fff;
-  cursor: pointer;
+.reserve-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #b30000;
+    margin: 10px 0;
+}
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 35px;
+    margin-bottom: 10px;
+}
+.home-btn-area {
+    text-align: center;
+    margin-top: 40px;
+}
+.home-btn {
+    padding: 12px 40px;
+    background: #fff;
+    border: 1px solid #000;
+    font-size: 17px;
+    cursor: pointer;
 }
 </style>
 </head>
@@ -198,25 +205,48 @@ mail($to, $subject, $message, $headers);
 
 <?php include("includes/header.php"); ?>
 
-<div class="container">
-  <h2>仮予約を受け付けました</h2>
+<div class="body-area">
 
-  <p class="note">
-    現時点ではまだ本予約（配車確定）ではありません。<br>
-    手配完了後、改めてご連絡いたします。
-  </p>
+<h1>仮予約を受け付けました</h1>
 
-  <div class="res-number">
-    【予約番号：<?= htmlspecialchars($reservationNumber) ?>】
-  </div>
+<p style="text-align:center;">
+    お客様のご入力内容で、<span class="red-note">仮予約</span>を受け付けました。<br>
+    現時点ではまだ<span class="red-note">本予約（配車確定）ではありません</span>ので、ご注意ください。
+</p>
 
-  <p class="note">
-    予約番号は必ずお控えください。
-  </p>
+<p class="reserve-number" style="text-align:center;">
+【予約番号：<?= htmlspecialchars($reservationNumber) ?>】
+</p>
 
-  <button class="btn-home" onclick="location.href='index.php'">
-    ホームページへ
-  </button>
+<p style="color:#d60000; text-align:center; margin-bottom:30px;">
+予約番号を必ずお控えください。
+</p>
+
+<div>
+    <div class="section-title">今後の流れ</div>
+
+    <ol style="padding-left:22px;">
+        <li>弊社にて、車両およびドライバーの空き状況、行程内容を確認いたします。</li>
+        <li>確認が完了次第、<span class="red-note">本予約可否と確定料金</span>をメールにてご連絡いたします。</li>
+        <li>ご案内メールをご確認後、問題なければそのまま本予約として手配いたします。</li>
+    </ol>
+</div>
+
+<div>
+    <div class="section-title">仮予約内容の変更・取消について</div>
+    内容を変更／取消される場合は、お手数ですが下記までお問い合わせください。
+</div>
+
+<div style="margin-top:30px;">
+    <div class="section-title">お問い合わせ</div>
+    電話：03-1234-5678（8:00–22:00）<br>
+    メール：<a href="mailto:support@maruwa-taxi.jp">support@maruwa-taxi.jp</a>
+</div>
+
+<div class="home-btn-area">
+    <button class="home-btn" onclick="location.href='index.php'">ホームページへ</button>
+</div>
+
 </div>
 
 <?php include("includes/footer.php"); ?>
