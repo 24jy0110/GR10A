@@ -117,6 +117,14 @@ $stmt_count->execute($params_count);
 $total = $stmt_count->fetchColumn();
 
 $total_pages = ceil($total / $per_page);
+/* ------------------------------
+   分页安全修正（防止页码越界）
+------------------------------ */
+if ($total_pages > 0 && $page > $total_pages) {
+    $page = $total_pages;
+    $offset = ($page - 1) * $per_page;
+}
+
 
 ?>
 
@@ -166,7 +174,8 @@ $total_pages = ceil($total / $per_page);
         margin-right: 6px;
     }
 
-    select, input[type="text"] {
+    select,
+    input[type="text"] {
         padding: 5px;
         font-size: 14px;
     }
@@ -186,7 +195,8 @@ $total_pages = ceil($total / $per_page);
         margin-top: 15px;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #ccc;
         padding: 10px 8px;
         text-align: left;
@@ -235,6 +245,17 @@ $total_pages = ceil($total / $per_page);
         background: #000;
         color: #fff;
     }
+
+    .page-ellipsis {
+    margin: 0 6px;
+    font-size: 14px;
+    color: #555;
+}
+
+.page-btn.active {
+    cursor: default;
+}
+
 </style>
 
 
@@ -322,7 +343,7 @@ $total_pages = ceil($total / $per_page);
                 <td><?= htmlspecialchars($v['vehicle_state']) ?></td>
                 <td>
                     <a class="detail-btn"
-                       href="uw111_02_vehicle_detail.php?number_plate=<?= urlencode($v['number_plate']) ?>">
+                        href="uw111_02_vehicle_detail.php?number_plate=<?= urlencode($v['number_plate']) ?>">
                         詳細
                     </a>
                 </td>
@@ -333,20 +354,43 @@ $total_pages = ceil($total / $per_page);
 
 
     <!-- 分页 -->
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+    <?php if ($total_pages > 1): ?>
+        <div class="pagination">
+            <?php
+            $range = 2; // 当前页前后显示的页数
 
-            <a class="page-btn <?= ($i == $page) ? 'active' : '' ?>"
-               href="?page=<?= $i ?>
-               &sales_office_code=<?= urlencode($sales_office_code) ?>
-               &vehicle_state=<?= urlencode($vehicle_state) ?>
-               &car_model_code=<?= urlencode($car_model_code) ?>
-               &keyword=<?= urlencode($keyword) ?>">
-                <?= $i ?>
-            </a>
+            $start = max(1, $page - $range);
+            $end   = min($total_pages, $page + $range);
 
-        <?php endfor; ?>
-    </div>
+            /* ---------- 首页 ---------- */
+            if ($start > 1) {
+                echo '<a class="page-btn" href="' . buildPageUrl(1) . '">1</a>';
+                if ($start > 2) {
+                    echo '<span class="page-ellipsis">...</span>';
+                }
+            }
+
+            /* ---------- 中间页 ---------- */
+            for ($i = $start; $i <= $end; $i++) {
+                if ($i == $page) {
+                    echo '<span class="page-btn active">' . $i . '</span>';
+                } else {
+                    echo '<a class="page-btn" href="' . buildPageUrl($i) . '">' . $i . '</a>';
+                }
+            }
+
+            /* ---------- 尾页 ---------- */
+            if ($end < $total_pages) {
+                if ($end < $total_pages - 1) {
+                    echo '<span class="page-ellipsis">...</span>';
+                }
+                echo '<a class="page-btn" href="' . buildPageUrl($total_pages) . '">' . $total_pages . '</a>';
+            }
+            ?>
+        </div>
+    <?php endif; ?>
+
+
 
 
     <!-- 下方按钮：车辆登记 -->
@@ -354,5 +398,15 @@ $total_pages = ceil($total / $per_page);
 
 </div>
 
+<?php
+function buildPageUrl($page)
+{
+    return '?page=' . $page
+        . '&sales_office_code=' . urlencode($_GET['sales_office_code'] ?? '')
+        . '&vehicle_state=' . urlencode($_GET['vehicle_state'] ?? '')
+        . '&car_model_code=' . urlencode($_GET['car_model_code'] ?? '')
+        . '&keyword=' . urlencode($_GET['keyword'] ?? '');
+}
+?>
 
 <?php require_once __DIR__ . "/includes/footer.php"; ?>
