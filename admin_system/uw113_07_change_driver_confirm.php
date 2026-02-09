@@ -77,13 +77,15 @@ if (!$newInfo) {
 }
 
 /* 新しいドライバーの言語 */
+/* 新しいドライバーの言語 */
 $newLangList = [];
 foreach (["language_id_1","language_id_2","language_id_3"] as $col) {
-    if ($newInfo[$col] !== "LCAT00") {
-        $newLangList[] = $langMap[$newInfo[$col]];
+    if (!empty($newInfo[$col]) && $newInfo[$col] !== "LCAT00") {
+        $newLangList[] = $langMap[$newInfo[$col]] ?? "―";
     }
 }
 $newLangText = $newLangList ? implode(" / ", $newLangList) : "なし";
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
