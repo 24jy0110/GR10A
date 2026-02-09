@@ -36,6 +36,7 @@ $start_date  = $res["service_start_time"];
 $end_date    = $res["service_end_date"];
 $req_lang1   = $res["lang_pref_1"];
 $req_lang2   = $res["lang_pref_2"];
+$current_driver_id = $res["driver_id"];
 
 /* ---------------------------------------------------
    言語名マップ
@@ -67,16 +68,20 @@ SELECT
 FROM driver d
 JOIN employee e ON e.employee_id = d.employee_id
 WHERE e.sales_office_code = :office
+  AND ( :current_driver IS NULL OR d.employee_id <> :current_driver )
 ORDER BY d.employee_id
+
 ";
 
 $stmt2 = $pdo->prepare($sql_driver);
 $stmt2->execute([
-    ":office"    => $office_code,
-    ":res_no"    => $resNo,
-    ":start_date"=> $start_date,
-    ":end_date"  => $end_date
+    ":office"         => $office_code,
+    ":res_no"         => $resNo,
+    ":start_date"     => $start_date,
+    ":end_date"       => $end_date,
+    ":current_driver" => $current_driver_id
 ]);
+
 
 $drivers = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
