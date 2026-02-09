@@ -65,12 +65,51 @@ try {
 <title>ドライバー登録完了</title>
 
 <style>
+
 body { font-family: "Noto Sans JP", sans-serif; margin: 60px 80px; }
+
 h1 { font-size: 26px; font-weight: 700; margin-bottom: 20px; }
-.text { font-size: 18px; line-height: 1.9; margin-bottom: 35px; }
-.info-box { font-size: 20px; line-height: 1.8; margin-bottom: 40px; }
-.btn { padding: 12px 32px; font-size: 18px; border: 2px solid #000; background: #fff; }
+
+.text {
+    font-size: 18px;
+    line-height: 1.9;
+    margin-bottom: 25px;
+}
+
+
+.alert {
+    color: #c40000;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+
+.info-box {
+    font-size: 20px;
+    line-height: 2;
+    padding: 20px 25px;
+    border: 2px solid #000;
+    background: #fafafa;
+    margin-bottom: 40px;
+}
+
+.info-box span.label {
+    display: inline-block;
+    width: 160px;
+    font-weight: bold;
+}
+
+.btn {
+    padding: 12px 32px;
+    font-size: 18px;
+    border: 2px solid #000;
+    background: #fff;
+    text-decoration: none;
+    color: #000;
+}
 .btn:hover { background: #000; color: #fff; }
+
 </style>
 </head>
 <body>
@@ -80,18 +119,25 @@ h1 { font-size: 26px; font-weight: 700; margin-bottom: 20px; }
 <h1>ドライバー用アカウントの登録が完了しました。</h1>
 
 <div class="text">
-ご登録いただいたメールアドレス宛に、ログインIDとパスワードを送信しました。<br>
-メールが届かない場合は、迷惑メールフォルダもご確認ください。必要に応じてシステム管理者までお問い合わせください。
+ログインIDとパスワードを発行しました。
+</div>
+
+<div class="alert">
+※ この画面は一度閉じると再表示できません。<br>
+※ 以下の情報を必ず控え、速やかにドライバーへお伝えください。
 </div>
 
 <div class="info-box">
-■ 今後のログインについて<br>
-・ドライバーは、メールに記載されたログインIDとパスワードでログインします。<br>
-・パスワードを忘れた場合は、システム管理者までご連絡ください。<br><br>
-
-<strong>社員ID：</strong><?= htmlspecialchars($employee_id) ?><br>
-<strong>初期パスワード：</strong><?= htmlspecialchars($initial_password) ?>
+    <div>
+        <span class="label">社員ID</span>
+        <?= htmlspecialchars($employee_id) ?>
+    </div>
+    <div>
+        <span class="label">初期パスワード</span>
+        <?= htmlspecialchars($initial_password) ?>
+    </div>
 </div>
+
 
 <a href="uw112_01_driver_list.php" class="btn">ドライバー一覧へ</a>
 
