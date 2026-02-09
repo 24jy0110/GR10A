@@ -21,7 +21,18 @@ $employee_id = "EMPL" . $year . "03" . $next3;
 
 // email & 初期パスワード
 $driver_email = $employee_id . "@maruwa.com";
-$initial_password = "Maruwa123";
+function generatePassword($length = 10) {
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $password = '';
+    $max = strlen($chars) - 1;
+
+    for ($i = 0; $i < $length; $i++) {
+        $password .= $chars[random_int(0, $max)];
+    }
+    return $password;
+}
+
+$initial_password = generatePassword(10);
 
 // 営業所リスト
 $office_list = $pdo->query("SELECT * FROM sales_office ORDER BY sales_office_code")->fetchAll();
@@ -71,14 +82,14 @@ function checkLimit() {
 
 <form action="uw112_07_driver_register_confirm.php" method="post" onsubmit="return checkLimit();">
 
-    <div class="label">社員ID：</div>
+    <div class="label">社員ID*：</div>
     <?= htmlspecialchars($employee_id) ?>
     <input type="hidden" name="employee_id" value="<?= $employee_id ?>"><br><br>
 
-    <div class="label">氏名：</div>
+    <div class="label">氏名*：</div>
     <input type="text" name="driver_name" required><br><br>
 
-    <div class="label">氏名（カナ）：</div>
+    <div class="label">氏名（カナ）*：</div>
     <input type="text" name="driver_name_kana" required><br><br>
 
     <div class="label">所属営業所：</div>
