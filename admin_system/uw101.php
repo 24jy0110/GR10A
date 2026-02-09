@@ -262,24 +262,33 @@ $langs     = $pdo->query("SELECT language_category_id, language_category_name FR
     <th>操作</th>
 </tr>
 
-<?php foreach ($resList as $r): ?>
+<?php if (empty($resList)): ?>
 <tr>
-    <td><?= htmlspecialchars($r['reservation_number']) ?></td>
-    <td><?= date("Y/m/d H:i", strtotime($r["service_start_time"])) ?></td>
-    <td><?= htmlspecialchars($r['ride_location']) ?></td>
-    <td><?= htmlspecialchars($r['drop_off_location']) ?></td>
-    <td><?= htmlspecialchars($r['customer_name']) ?></td>
-    <td><?= htmlspecialchars($r['car_model_name'] . " / " . $r['ride_count']) ?></td>
-    <td>
-        <span class="badge badge-<?= $r['state_code'] ?>">
-            <?= htmlspecialchars($r['state_name']) ?>
-        </span>
-    </td>
-    <td>
-        <a class="detail-btn" href="uw102.php?r=<?= urlencode($r['reservation_number']) ?>">詳細</a>
+    <td colspan="8" style="text-align:center; padding:30px; color:#888;">
+        該当する予約はありません
     </td>
 </tr>
-<?php endforeach; ?>
+<?php else: ?>
+    <?php foreach ($resList as $r): ?>
+    <tr>
+        <td><?= htmlspecialchars($r['reservation_number']) ?></td>
+        <td><?= date("Y/m/d H:i", strtotime($r["service_start_time"])) ?></td>
+        <td><?= htmlspecialchars($r['ride_location']) ?></td>
+        <td><?= htmlspecialchars($r['drop_off_location']) ?></td>
+        <td><?= htmlspecialchars($r['customer_name']) ?></td>
+        <td><?= htmlspecialchars($r['car_model_name'] . " / " . $r['ride_count']) ?></td>
+        <td>
+            <span class="badge badge-<?= $r['state_code'] ?>">
+                <?= htmlspecialchars($r['state_name']) ?>
+            </span>
+        </td>
+        <td>
+            <a class="detail-btn" href="uw102.php?r=<?= urlencode($r['reservation_number']) ?>">詳細</a>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+<?php endif; ?>
+
 
 </table>
 
