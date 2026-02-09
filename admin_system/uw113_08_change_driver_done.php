@@ -57,13 +57,15 @@ if (!$driver) {
 $langMap = $pdo->query("SELECT language_category_id, language_category_name FROM language_category")
                ->fetchAll(PDO::FETCH_KEY_PAIR);
 
+/* 言語名処理（NULL / 空対策済み） */
 $langs = [];
 foreach (["language_id_1","language_id_2","language_id_3"] as $col) {
-    if ($driver[$col] !== "LCAT00") {
-        $langs[] = $langMap[$driver[$col]];
+    if (!empty($driver[$col]) && $driver[$col] !== "LCAT00") {
+        $langs[] = $langMap[$driver[$col]] ?? "―";
     }
 }
 $langText = $langs ? implode(" / ", $langs) : "なし";
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
