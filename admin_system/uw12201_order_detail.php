@@ -49,7 +49,13 @@ $rideDate = date("Y/m/d H:i", strtotime($res["service_start_time"]));
 
 $start = new DateTime($res["service_start_time"]);
 $end   = new DateTime($res["service_end_date"]);
-$days  = $start->diff($end)->days + 2;
+$days  = $start->diff($end)->days;
+if ($start->diff($end)->days == 0) {
+    $days = 1;
+} else {
+    $days = $start->diff($end)->days + 2;
+}
+
 
 ?>
 <!DOCTYPE html>
