@@ -66,9 +66,32 @@ $dropText   = trim("{$res['drop_pref']} {$res['drop_city']} {$res['drop_detail']
     border:1px solid #000; padding:12px; font-size:15px;
 }
 .confirm-table th {background:#f5f5f5; width:220px;}
-.button-row {text-align:center; margin-top:40px;}
-.btn-next {background:#000; color:#fff; padding:14px 40px; border:none;}
-.btn-back {background:#fff; border:1px solid #000; padding:14px 30px; margin-right:20px;}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.button-row form {
+    margin: 0;
+}
+
+.btn-next {
+    background:#000;
+    color:#fff;
+    padding:14px 40px;
+    border:none;
+}
+
+.btn-back {
+    background:#fff;
+    border:1px solid #000;
+    padding:14px 30px;
+}
+
 </style>
 </head>
 
@@ -93,13 +116,21 @@ $dropText   = trim("{$res['drop_pref']} {$res['drop_city']} {$res['drop_detail']
 <tr><th>メール</th><td><?= htmlspecialchars($res['customer_email']) ?></td></tr>
 <tr><th>電話番号</th><td><?= htmlspecialchars($res['customer_phone']) ?></td></tr>
 </table>
-
-<form action="uw05_05.php" method="post">
 <div class="button-row">
-    <button class="btn-back" onclick="location.href='uw05_03.php'">修正する</button>
-    <button type="submit" class="btn-next">予約を確定する</button>
+    <button
+        type="button"
+        class="btn-back"
+        onclick="location.href='uw05_03.php'">
+        修正する
+    </button>
+
+    <form action="uw05_05.php" method="post">
+        <button type="submit" class="btn-next">
+            予約を確定する
+        </button>
+    </form>
 </div>
-</form>
+
 
 </div>
 
