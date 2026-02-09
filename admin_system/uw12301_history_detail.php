@@ -52,7 +52,11 @@ if (!$res) {
    表示加工
 --------------------------------------------------- */
 $rideDate = date("Y/m/d H:i", strtotime($res["service_start_time"]));
-$days = (new DateTime($res["service_start_time"]))->diff(new DateTime($res["service_end_date"]))->days + 1;
+
+$startDate = new DateTime(date('Y-m-d', strtotime($res["service_start_time"])));
+$endDate   = new DateTime(date('Y-m-d', strtotime($res["service_end_date"])));
+$days = $startDate->diff($endDate)->days + 1;
+
 
 /* 言語 */
 $langs = [];
