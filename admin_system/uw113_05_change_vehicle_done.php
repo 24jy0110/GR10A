@@ -88,10 +88,8 @@ ini_set("SMTP", "10.64.144.9");
 ini_set("smtp_port", "25");
 
 /* 件名（★必ずエンコード） */
-$subject = mb_encode_mimeheader(
-    "【丸和交通】配車変更のお知らせ（予約番号：{$resNo}）",
-    "ISO-2022-JP"
-);
+$subject = "【丸和交通】配車変更のお知らせ（予約番号：{$resNo}）";
+
 
 /* 本文（UTF-8） */
 $body_utf8 = <<<MAIL
