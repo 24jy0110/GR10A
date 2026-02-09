@@ -19,7 +19,7 @@ $resNo = $_GET["r"];
     SQL：対象予約を取得（安全チェック）
 --------------------------------------------------- */
 $sql = "
-SELECT reservation_number, state_code, driver_id, car_id
+SELECT reservation_number, state_code, driver_id, number_plate
 FROM reservation
 WHERE reservation_number = :no
 ";
@@ -58,7 +58,7 @@ try {
     $sql_upd = "
         UPDATE reservation
         SET state_code = 'STC05',
-            finish_datetime = NOW()
+            service_end_date = NOW()
         WHERE reservation_number = :no
     ";
     $stmt = $pdo->prepare($sql_upd);
