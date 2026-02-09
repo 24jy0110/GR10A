@@ -114,9 +114,7 @@ if ($selected_plate === null) {
 }
 
 
-/* ---------------------------------------------------
-   2) 予約更新：driver + vehicle + STC02
---------------------------------------------------- */
+
 $upd = "
 UPDATE reservation
 SET driver_id = :driver,
@@ -133,11 +131,82 @@ $ok = $stmt->execute([
     ":no"     => $resNo
 ]);
 
-/* 若更新失败（别人抢单），跳转到不可用页面 */
+
 if ($stmt->rowCount() === 0) {
     header("Location: uw122_order_unavailable.php?r=" . urlencode($resNo));
     exit;
 }
+
+mb_language("Japanese");
+mb_internal_encoding("UTF-8");
+
+ini_set("SMTP", "10.64.144.9");
+ini_set("smtp_port", "25");
+date_default_timezone_set('Asia/Tokyo');
+
+$to = $res["customer_email"];
+$subject = "ご予約確定のお知らせ（予約番号：{$resNo}）";
+
+$driverName = $driver["employee_name"];
+$plate      = $selected_plate;
+
+
+$start = new DateTime($res["service_start_time"]);
+$end   = new DateTime($res["service_end_date"]);
+$days  = $start->diff($end)->days + 2;
+
+
+$dailyFee = $res["car_model_use_fee"] ?? '';
+$totalFee = $res["usage_fee"] ?? '';
+
+$body = <<<EOT
+{$res["customer_name"]} 様
+
+このたびは、丸和交通株式会社 観光タクシーサービスをご予約いただき、
+誠にありがとうございます。
+
+以下の内容にて、ご予約が確定いたしましたのでご確認ください。
+
+━━━━━━━━━━━━━━━━━━━━━━
+■ 予約番号
+━━━━━━━━━━━━━━━━━━━━━━
+{$resNo}
+
+━━━━━━━━━━━━━━━━━━━━━━
+■ 行程概要
+━━━━━━━━━━━━━━━━━━━━━━
+乗車日時　{$res["service_start_time"]}
+乗車場所　{$res["ride_location"]}
+降車場所　{$res["drop_off_location"]}
+利用日数　{$days}日間
+
+━━━━━━━━━━━━━━━━━━━━━━
+■ 車両・ドライバー
+━━━━━━━━━━━━━━━━━━━━━━
+車種　　　　　　　　{$res["car_model_name"]}
+車両番号　　　　　　{$plate}
+ドライバー対応言語　日本語
+
+━━━━━━━━━━━━━━━━━━━━━━
+■ 料金明細（すべて税込）
+━━━━━━━━━━━━━━━━━━━━━━
+1日料金　{$dailyFee}円
+合計　　 {$totalFee}円
+
+━━━━━━━━━━━━━━━━━━━━━━
+■ お問い合わせ
+━━━━━━━━━━━━━━━━━━━━━━
+丸和交通株式会社 観光タクシー予約センター
+TEL：03-1234-5678（8:00～22:00）
+MAIL：support@maruwa-taxi.jp
+
+EOT;
+
+$fromName = mb_encode_mimeheader("丸和交通", "UTF-8");
+$headers  = "From: {$fromName} <24jy0110@jynet.jec.ac.jp>";
+
+
+mb_send_mail($to, $subject, $body, $headers);
 
 ?>
 <!DOCTYPE html>
