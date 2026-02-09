@@ -36,6 +36,7 @@ $job_text = [
 <header style="
     width:100%;
     padding:20px 40px;
+    box-sizing:border-box;
     border-bottom:1px solid #dcdcdc;
     background:#fff;
     display:flex;
@@ -43,6 +44,7 @@ $job_text = [
     align-items:center;
     font-family:'Noto Sans JP', sans-serif;
 ">
+
 
     <!-- 左：会社名 -->
     <div>

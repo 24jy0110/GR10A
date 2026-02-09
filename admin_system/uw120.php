@@ -87,13 +87,12 @@ foreach ($orders as $o) {
 <head>
 <meta charset="UTF-8">
 <title>乗務員メニュー | 丸和交通</title>
-<link rel="stylesheet" href="assets/app.css">
 
 <style>
 body {
     font-family: "Noto Sans JP", sans-serif;
     text-align: center;
-    margin-top: 60px;
+    margin: 0;
 }
 
 /* menu button */
