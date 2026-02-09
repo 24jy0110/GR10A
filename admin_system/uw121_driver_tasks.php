@@ -42,7 +42,8 @@ $now = time();
 foreach ($jobs as $j) {
 
     $start = strtotime($j["service_start_time"]);
-    $end   = strtotime($j["service_end_date"]);
+    $end = strtotime($j["service_end_date"] . " 23:59:59");
+
 
     /* ---- case 1: 已经在运行中的订单（STC04） ---- */
     if ($start <= $now && $now <= $end) {
