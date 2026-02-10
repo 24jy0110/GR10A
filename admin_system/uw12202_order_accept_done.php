@@ -145,7 +145,7 @@ ini_set("smtp_port", "25");
 date_default_timezone_set('Asia/Tokyo');
 
 $to = $res["customer_email"];
-$subject = "ご予約確定のお知らせ（予約番号：{$resNo}）";
+$subject = "【丸和交通】ご予約確定のお知らせ（予約番号：{$resNo}）";
 
 $driverName = $driver["employee_name"];
 $plate      = $selected_plate;
