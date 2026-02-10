@@ -203,12 +203,12 @@ MAIL：info@maruwa-taxi.jp
 今後とも、丸和交通をご愛顧賜りますようよろしくお願い申し上げます。
 EOT;
 
-/* ★ From：差出人名也必须编码 */
+
 $fromName  = mb_encode_mimeheader("丸和交通株式会社", "UTF-8");
-$fromEmail = "24jy0110@jynet.jec.ac.jp";
+$fromEmail = "support@maruwa-taxi.jp";
 $headers   = "From: {$fromName} <{$fromEmail}>";
 
-/* 发送 */
+
 mb_send_mail($to, $subject, $body, $headers);
 
 ?>
