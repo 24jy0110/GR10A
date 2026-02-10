@@ -199,7 +199,7 @@ input {
 
 <tr>
   <th><span class="required">※</span> 電話番号</th>
-  <td><input name="customer_phone" required></td>
+  <td><input name="customer_phone" pattern="^[0-9+\-\s]+$" required></td>
 </tr>
 
 </table>
