@@ -3,68 +3,89 @@ require_once __DIR__ . "/includes/check_login.php";
 require_once __DIR__ . "/includes/db_connect.php";
 require_once __DIR__ . "/includes/header.php";
 
-/* ------------------------------
-   下拉：车型
------------------------------- */
-$sql = "SELECT car_model_code, car_model_name, car_model_capacity 
-        FROM car_model ORDER BY car_model_code";
+$sql = "SELECT car_model_code, car_model_name, car_model_capacity
+        FROM car_model
+        ORDER BY car_model_code";
 $stmt = $pdo->query($sql);
-$car_models = $stmt->fetchAll();
+$car_models = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /* ------------------------------
    下拉：营业所
 ------------------------------ */
-$sql = "SELECT sales_office_code, sales_office_name 
-        FROM sales_office ORDER BY sales_office_code";
+$sql = "SELECT sales_office_code, sales_office_name
+        FROM sales_office
+        ORDER BY sales_office_code";
 $stmt = $pdo->query($sql);
-$sales_offices = $stmt->fetchAll();
+$sales_offices = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$error = "";
 
 /* ------------------------------
    注册处理（POST）
 ------------------------------ */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $number_plate = $_POST['number_plate'] ?? '';
-    $car_model_code = $_POST['car_model_code'] ?? '';
+    $number_plate      = trim($_POST['number_plate'] ?? '');
+    $car_model_code    = $_POST['car_model_code'] ?? '';
     $sales_office_code = $_POST['sales_office_code'] ?? '';
 
-    // 基本验证（必填）
+    /* ① 必填校验 */
     if ($number_plate === '' || $car_model_code === '' || $sales_office_code === '') {
         $error = "未入力の項目があります。";
+
     } else {
 
-        /* 从车型表自动取定员 */
-        $sql = "SELECT car_model_capacity 
-                FROM car_model 
-                WHERE car_model_code = :cm";
+        /* ② ナンバープレート重複チェック */
+        $sql = "SELECT COUNT(*) FROM vehicle WHERE number_plate = :num";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(":cm", $car_model_code);
-        $stmt->execute();
-        $capacity = $stmt->fetchColumn();
+        $stmt->execute([":num" => $number_plate]);
+        $exists = (int)$stmt->fetchColumn();
 
-        if (!$capacity) {
-            $error = "車種情報の取得に失敗しました。";
+        if ($exists > 0) {
+            $error = "このナンバープレートの車両は既に登録されています。";
+
         } else {
 
-            /* 插入 vehicle 表 */
-            $sql = "INSERT INTO vehicle 
-                    (number_plate, vehicle_capacity, vehicle_state, sales_office_code, car_model_code)
-                    VALUES 
-                    (:num, :cap, '空車', :so, :cm)";
+            /* ③ 車種から定員取得 */
+            $sql = "SELECT car_model_capacity
+                    FROM car_model
+                    WHERE car_model_code = :cm";
             $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(":num", $number_plate);
-            $stmt->bindValue(":cap", $capacity);
-            $stmt->bindValue(":so", $sales_office_code);
-            $stmt->bindValue(":cm", $car_model_code);
+            $stmt->execute([":cm" => $car_model_code]);
+            $capacity = $stmt->fetchColumn();
 
-            $stmt->execute();
+            if (!$capacity) {
+                $error = "車種情報の取得に失敗しました。";
 
-            // 跳到完了页面
-            header("Location: uw111_05_vehicle_add_done.php");
-            exit;
+            } else {
+
+                /* ④ vehicle 登録 */
+                try {
+                    $sql = "INSERT INTO vehicle
+                            (number_plate, vehicle_capacity, vehicle_state, sales_office_code, car_model_code)
+                            VALUES
+                            (:num, :cap, '空車', :so, :cm)";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ":num" => $number_plate,
+                        ":cap" => $capacity,
+                        ":so"  => $sales_office_code,
+                        ":cm"  => $car_model_code
+                    ]);
+
+                    /* 完了画面へ */
+                    header("Location: uw111_05_vehicle_add_done.php");
+                    exit;
+
+                } catch (PDOException $e) {
+                    $error = "車両登録中にエラーが発生しました。";
+                }
+            }
         }
     }
 }
+?>
+
 ?>
 
 <style>
