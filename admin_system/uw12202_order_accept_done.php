@@ -209,7 +209,7 @@ MAIL：support@maruwa-taxi.jp
 EOT;
 
 $fromName = mb_encode_mimeheader("丸和交通", "UTF-8");
-$headers  = "From: {$fromName} <24jy0110@jynet.jec.ac.jp>";
+$headers  = "From: {$fromName} <support@maruwa-taxi.jp>";
 
 
 mb_send_mail($to, $subject, $body, $headers);
