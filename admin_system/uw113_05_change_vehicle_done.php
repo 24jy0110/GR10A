@@ -115,19 +115,18 @@ $body_utf8 = <<<MAIL
 --------------------------------------------------
 丸和交通株式会社 観光ハイヤー予約センター
 TEL：03-1234-5678（8:00〜22:00）
-MAIL：info@maruwa-taxi.jp
+MAIL：support@maruwa-taxi.jp
 MAIL;
 
-/* ★ ISO-2022-JP に変換 */
+
 $body = mb_convert_encoding($body_utf8, "ISO-2022-JP", "UTF-8");
 
-/* ヘッダ */
+
 $headers  = "From: " . mb_encode_mimeheader("丸和交通株式会社", "ISO-2022-JP")
-    . " <info@maruwa-taxi.jp>\r\n";
-$headers .= "Reply-To: info@maruwa-taxi.jp\r\n";
+    . " <support@maruwa-taxi.jp>\r\n";
+$headers .= "Reply-To: support@maruwa-taxi.jp\r\n";
 $headers .= "Content-Type: text/plain; charset=ISO-2022-JP\r\n";
 
-/* 送信 */
 mb_send_mail($to, $subject, $body, $headers);
 ?>
 
