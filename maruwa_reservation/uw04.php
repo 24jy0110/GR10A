@@ -35,9 +35,10 @@
             font-weight: bold;
         }
 
+        /* 🔴 关键点：现在是 2 列 */
         .price-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1fr 1fr;
+            grid-template-columns: 1.2fr 1fr;
             gap: 20px;
             align-items: center;
         }
@@ -66,8 +67,8 @@
 
         .price-cell {
             font-size: 16px;
+            font-weight: bold;
         }
-
 
         .back-row {
             text-align: center;
@@ -95,17 +96,17 @@
     $currentPage = 'uw04';
     include('includes/header.php');
     ?>
+
     <div class="price-wrapper">
         <div class="price-title">日貸し（1日単位）の参考料金設定案</div>
         <div class="price-note">
-            ※いずれも《車両＋専属ドライバー＋燃料＋保険込み》／
-            高速代・駐車料・宿泊費は<span class="red">別途</span>
+            ※いずれも《車両＋専属ドライバー＋燃料＋宿泊費＋保険込み》／
+            高速代・駐車料は<span class="red">別途</span>
         </div>
 
-        <!-- 表头 -->
         <div class="price-grid">
+            <!-- 表头 -->
             <div class="price-header">車種</div>
-            <div class="price-header">1日基本料金（税込）<br>日本語対応</div>
             <div class="price-header">1日基本料金（税込）<br>外国語対応</div>
 
             <!-- Crown -->
@@ -113,7 +114,6 @@
                 <img src="imgs/crown.jpg" alt="トヨタ Crown">
                 <div class="car-name">トヨタ Crown</div>
             </div>
-            <div class="price-cell">65,000円</div>
             <div class="price-cell">73,000円</div>
 
             <!-- Alphard -->
@@ -121,7 +121,6 @@
                 <img src="imgs/alphard.jpg" alt="トヨタ Alphard">
                 <div class="car-name">トヨタ Alphard</div>
             </div>
-            <div class="price-cell">70,000円</div>
             <div class="price-cell">78,000円</div>
 
             <!-- Hiace -->
@@ -129,7 +128,6 @@
                 <img src="imgs/HIACE.png" alt="トヨタ Hiace">
                 <div class="car-name">トヨタ Hiace</div>
             </div>
-            <div class="price-cell">75,000円</div>
             <div class="price-cell">83,000円</div>
         </div>
 
@@ -141,5 +139,4 @@
     <?php include("includes/footer.php"); ?>
 
 </body>
-
 </html>
