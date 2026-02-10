@@ -147,25 +147,21 @@ $stmt->execute([
     ':number_plate'       => $numberPlate,   // NULL
     ':driver_id'          => $driverId       // NULL
 ]);
-/* ============================================================
-   仮予約完了メール送信（161教室用）
-============================================================ */
+
 mb_language("Japanese");
 mb_internal_encoding("UTF-8");
 
-/* ★ 日本时间（非常重要） */
+
 date_default_timezone_set('Asia/Tokyo');
 
-/* ★ 学校 SMTP */
+
 ini_set("SMTP", "10.64.144.9");
 ini_set("smtp_port", "25");
 
-/* 申込日時 */
+
 $applyDateTime = date('Y年m月d日 H:i');
 
-$to = $res['customer_email']; // 例：24jy0110@jynet.jec.ac.jp
-
-/* ★ Subject：必须编码（日文） */
+$to = $res['customer_email']; 
 $subject = "【丸和交通】仮予約完了のお知らせ";
 
 $body = <<<EOT
