@@ -247,15 +247,14 @@ if ($total_pages > 0 && $page > $total_pages) {
     }
 
     .page-ellipsis {
-    margin: 0 6px;
-    font-size: 14px;
-    color: #555;
-}
+        margin: 0 6px;
+        font-size: 14px;
+        color: #555;
+    }
 
-.page-btn.active {
-    cursor: default;
-}
-
+    .page-btn.active {
+        cursor: default;
+    }
 </style>
 
 
@@ -335,20 +334,29 @@ if ($total_pages > 0 && $page > $total_pages) {
             <th>操作</th>
         </tr>
 
-        <?php foreach ($vehicles as $v): ?>
+        <?php if (count($vehicles) > 0): ?>
+            <?php foreach ($vehicles as $v): ?>
+                <tr>
+                    <td><?= htmlspecialchars($v['number_plate']) ?></td>
+                    <td><?= htmlspecialchars($v['sales_office_name']) ?></td>
+                    <td><?= htmlspecialchars($v['car_model_name']) ?> / <?= $v['car_model_capacity'] ?>名</td>
+                    <td><?= htmlspecialchars($v['vehicle_state']) ?></td>
+                    <td>
+                        <a class="detail-btn"
+                            href="uw111_02_vehicle_detail.php?number_plate=<?= urlencode($v['number_plate']) ?>">
+                            詳細
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
             <tr>
-                <td><?= htmlspecialchars($v['number_plate']) ?></td>
-                <td><?= htmlspecialchars($v['sales_office_name']) ?></td>
-                <td><?= htmlspecialchars($v['car_model_name']) ?> / <?= $v['car_model_capacity'] ?>名</td>
-                <td><?= htmlspecialchars($v['vehicle_state']) ?></td>
-                <td>
-                    <a class="detail-btn"
-                        href="uw111_02_vehicle_detail.php?number_plate=<?= urlencode($v['number_plate']) ?>">
-                        詳細
-                    </a>
+                <td colspan="5" style="text-align:center; padding:20px; color:#555;">
+                    該当する車両はありません。
                 </td>
             </tr>
-        <?php endforeach; ?>
+        <?php endif; ?>
+
 
     </table>
 
