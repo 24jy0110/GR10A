@@ -14,7 +14,7 @@ $required = [
     'drop_pref',
     'drop_city',
     'drop_detail',
-    'car_model_code',        // ★ 追加必須
+    'car_model_code',        
     'car_model_name',
     'car_model_use_fee',
     'customer_name',
@@ -86,7 +86,7 @@ INSERT INTO reservation (
     reservation_number,
     reservation_date,
     ride_count,
-    car_model_code,       -- ★ 新規追加
+    car_model_code,   
     ride_location,
     drop_off_location,
     service_start_time,
@@ -129,7 +129,7 @@ $stmt = $pdo->prepare($sql);
 
 $stmt->execute([
     ':reservation_number' => $reservationNumber,
-    ':reservation_date'   => $res['start_date'],  // ★ ここ：開始日 = 予約日
+    ':reservation_date'   => $reservationDate = date('Y-m-d'), 
     ':ride_count'         => $res['ride_count'],
     ':car_model_code'     => $res['car_model_code'], // ★ 重要
     ':ride_location'      => $rideLocation,
