@@ -43,15 +43,15 @@ if (!$vehicle) {
 ------------------------------------------ */
 $sql = "
     SELECT 
-        reservation_number,
-        reservation_date,
-        service_start_time,
-        service_end_date,
-        customer_name
-    FROM reservation
-    WHERE number_plate = :num
-    AND reservation_date > CURDATE()
-    ORDER BY reservation_date ASC
+    reservation_number,
+    reservation_date,
+    service_start_time,
+    service_end_date,
+    customer_name
+FROM reservation
+WHERE number_plate = :num
+  AND service_start_time > NOW()
+ORDER BY service_start_time ASC
 ";
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(":num", $number_plate);
@@ -62,72 +62,83 @@ $future_count = count($future_reservations);
 ?>
 
 <style>
-.container {
-    width: 92%;
-    max-width: 900px;
-    margin: 25px auto;
-    font-family: "Yu Gothic", sans-serif;
-}
+    .container {
+        width: 92%;
+        max-width: 900px;
+        margin: 25px auto;
+        font-family: "Yu Gothic", sans-serif;
+    }
 
-.title {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
+    .title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
 
-.section {
-    padding: 18px;
-    border: 1px solid #ccc;
-    margin-bottom: 25px;
-    border-radius: 6px;
-}
+    .section {
+        padding: 18px;
+        border: 1px solid #ccc;
+        margin-bottom: 25px;
+        border-radius: 6px;
+    }
 
-.section-title {
-    font-size: 18px;
-    margin-bottom: 12px;
-    font-weight: bold;
-}
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+        font-weight: bold;
+    }
 
-.info-row {
-    margin-bottom: 10px;
-}
+    .info-row {
+        margin-bottom: 10px;
+    }
 
-.state-badge {
-    padding: 4px 10px;
-    border-radius: 5px;
-    color: #fff;
-}
+    .state-badge {
+        padding: 4px 10px;
+        border-radius: 5px;
+        color: #fff;
+    }
 
-.badge-green { background: #4caf50; }
-.badge-red { background: #d9534f; }
-.badge-gray { background: #777; }
-.badge-blue { background: #0275d8; }
+    .badge-green {
+        background: #4caf50;
+    }
 
-.detail-btn {
-    padding: 6px 12px;
-    background: #0275d8;
-    color: #fff;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 13px;
-}
+    .badge-red {
+        background: #d9534f;
+    }
 
-.back-btn {
-    padding: 12px 20px;
-    background: #fff;
-    color: #333;
-    border: 1px solid #333;
-    border-radius: 6px;
-    text-decoration: none;
-}
+    .badge-gray {
+        background: #777;
+    }
 
-.state-update-btn {
-    padding: 12px 20px;
-    background: #000;
-    color: #fff;
-    border-radius: 6px;
-    text-decoration: none;
-    margin-right: 15px;
-}
+    .badge-blue {
+        background: #0275d8;
+    }
+
+    .detail-btn {
+        padding: 6px 12px;
+        background: #0275d8;
+        color: #fff;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .back-btn {
+        padding: 12px 20px;
+        background: #fff;
+        color: #333;
+        border: 1px solid #333;
+        border-radius: 6px;
+        text-decoration: none;
+    }
+
+    .state-update-btn {
+        padding: 12px 20px;
+        background: #000;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-right: 15px;
+    }
 </style>
 
 <div class="container">
@@ -175,7 +186,7 @@ $future_count = count($future_reservations);
                     &nbsp;&nbsp;
 
                     <a class="detail-btn"
-                       href="uw111_06_reservation_detail.php?reservation_number=<?= urlencode($res['reservation_number']) ?>">
+                        href="uw111_06_reservation_detail.php?reservation_number=<?= urlencode($res['reservation_number']) ?>">
                         詳細
                     </a>
 
@@ -189,7 +200,7 @@ $future_count = count($future_reservations);
     <!-- 操作ボタン -->
     <div>
         <a class="state-update-btn"
-           href="uw111_03_vehicle_update.php?number_plate=<?= urlencode($number_plate) ?>">
+            href="uw111_03_vehicle_update.php?number_plate=<?= urlencode($number_plate) ?>">
             車両状態を更新する
         </a>
 

@@ -3,6 +3,9 @@ require_once __DIR__ . "/includes/check_login.php";
 require_once __DIR__ . "/includes/db_connect.php";
 require_once __DIR__ . "/includes/header.php";
 
+/* -----------------------------
+   パラメータ取得
+----------------------------- */
 $number_plate = $_GET["number_plate"] ?? "";
 
 if ($number_plate === "") {
@@ -11,25 +14,24 @@ if ($number_plate === "") {
     exit;
 }
 
-/* -----------------------------------------
-   車両情報を取得
------------------------------------------- */
+/* -----------------------------
+   車両情報取得
+----------------------------- */
 $sql = "
-    SELECT 
-        v.number_plate,
-        v.vehicle_state,
-        cm.car_model_name,
-        cm.car_model_capacity,
-        so.sales_office_name
-    FROM vehicle v
-    JOIN sales_office so ON v.sales_office_code = so.sales_office_code
-    JOIN car_model cm ON v.car_model_code = cm.car_model_code
-    WHERE v.number_plate = :num
+SELECT 
+    v.number_plate,
+    v.vehicle_state,
+    cm.car_model_name,
+    cm.car_model_capacity,
+    so.sales_office_name
+FROM vehicle v
+JOIN sales_office so ON v.sales_office_code = so.sales_office_code
+JOIN car_model cm ON v.car_model_code = cm.car_model_code
+WHERE v.number_plate = :num
 ";
 $stmt = $pdo->prepare($sql);
-$stmt->bindValue(":num", $number_plate);
-$stmt->execute();
-$vehicle = $stmt->fetch();
+$stmt->execute([":num" => $number_plate]);
+$vehicle = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$vehicle) {
     echo "<p>該当する車両が存在しません。</p>";
@@ -37,33 +39,56 @@ if (!$vehicle) {
     exit;
 }
 
-/* -----------------------------------------
-   状態一覧（画面表示順）
------------------------------------------- */
+/* -----------------------------
+   未来・進行中予約チェック
+----------------------------- */
+$sql = "
+SELECT COUNT(*)
+FROM reservation
+WHERE number_plate = :num
+  AND state_code IN ('STC02', 'STC04')
+  AND service_start_time >= NOW()
+";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([":num" => $number_plate]);
+$future_reserve_count = (int)$stmt->fetchColumn();
+
+/* -----------------------------
+   状態判定
+----------------------------- */
+$is_in_use_now = ($vehicle["vehicle_state"] === "使用中");
+$has_future_reservation = ($future_reserve_count > 0);
+$can_change_state = !$is_in_use_now && !$has_future_reservation;
+
+/* -----------------------------
+   状態一覧（変更可能なもの）
+----------------------------- */
 $states = [
-    "空車" => "green",
+    "空車"     => "green",
     "使用停止" => "red",
-    "廃車" => "gray"
+    "廃車"     => "gray"
 ];
 
-/* -----------------------------------------
-   運行中は変更不可
------------------------------------------- */
-$is_running = ($vehicle["vehicle_state"] === "運行中");
-
-/* -----------------------------------------
+/* -----------------------------
    POST処理（更新）
------------------------------------------- */
-if ($_SERVER["REQUEST_METHOD"] === "POST" && !$is_running) {
+----------------------------- */
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    /* 後段防御（重要） */
+    if (!$can_change_state) {
+        header("Location: uw111_02_vehicle_detail.php?number_plate=" . urlencode($number_plate));
+        exit;
+    }
 
     $new_state = $_POST["vehicle_state"] ?? "";
 
-    if ($new_state !== "") {
+    if ($new_state !== "" && array_key_exists($new_state, $states)) {
         $sql = "UPDATE vehicle SET vehicle_state = :st WHERE number_plate = :num";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(":st", $new_state);
-        $stmt->bindValue(":num", $number_plate);
-        $stmt->execute();
+        $stmt->execute([
+            ":st"  => $new_state,
+            ":num" => $number_plate
+        ]);
     }
 
     header("Location: uw111_02_vehicle_detail.php?number_plate=" . urlencode($number_plate));
@@ -78,144 +103,92 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !$is_running) {
     margin: 20px auto;
     font-family: "Yu Gothic", sans-serif;
 }
-
-h2 {
-    font-size: 22px;
-    margin-bottom: 15px;
-}
-
+h2 { font-size: 22px; margin-bottom: 15px; }
 .state-badge {
     display: inline-block;
     padding: 5px 12px;
-    background: green;
     color: #fff;
     border-radius: 5px;
     font-weight: bold;
 }
-
-.radio-row {
-    margin: 15px 0;
-}
-
-.radio-option {
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-}
-
-.radio-btn {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-}
-
-.label-green {
-    background-color: #4caf50;
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: white;
-}
-
-.label-red {
-    background-color: #d9534f;
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: white;
-}
-
-.label-gray {
-    background-color: #777;
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: white;
-}
-
-.notice {
-    margin-top: 25px;
-    font-size: 13px;
-    color: #555;
-    line-height: 1.6em;
-}
-
-.btn-area {
-    margin-top: 30px;
-}
-
+.label-green { background:#4caf50; padding:4px 10px; border-radius:4px; color:#fff; }
+.label-red   { background:#d9534f; padding:4px 10px; border-radius:4px; color:#fff; }
+.label-gray  { background:#777;    padding:4px 10px; border-radius:4px; color:#fff; }
+.radio-option { margin:12px 0; display:flex; align-items:center; }
+.radio-btn { margin-right:10px; }
+.notice { margin-top:25px; font-size:13px; color:#555; line-height:1.6em; }
+.btn-area { margin-top:30px; }
 .update-btn {
-    padding: 12px 20px;
-    background: #000;
-    color: #fff;
-    border-radius: 6px;
-    text-decoration: none;
+    padding:12px 20px;
+    background:#000;
+    color:#fff;
+    border-radius:6px;
+    border:none;
 }
-
 .back-btn {
-    margin-left: 20px;
-    padding: 12px 20px;
-    background: #fff;
-    color: #333;
-    border: 1px solid #333;
-    border-radius: 6px;
-    text-decoration: none;
+    margin-left:20px;
+    padding:12px 20px;
+    border:1px solid #333;
+    background:#fff;
+    text-decoration:none;
 }
 </style>
 
 <div class="container">
 
-    <h2>本日の車両状態　
-        <span class="state-badge" style="background:
-            <?= ($vehicle["vehicle_state"] === "空車") ? "green" : (($vehicle["vehicle_state"] === "使用停止") ? "#d9534f" : "#555") ?>">
-            <?= htmlspecialchars($vehicle["vehicle_state"]) ?>
-        </span>
-    </h2>
+<h2>
+車両状態：
+<span class="state-badge" style="background:
+<?= ($vehicle["vehicle_state"] === "空車") ? "#4caf50" :
+   (($vehicle["vehicle_state"] === "使用停止") ? "#d9534f" :
+   (($vehicle["vehicle_state"] === "廃車") ? "#777" : "#555")) ?>">
+<?= htmlspecialchars($vehicle["vehicle_state"]) ?>
+</span>
+</h2>
 
-    <div>実際の状態を選択してください</div>
+<!-- 状態警告 -->
+<?php if ($is_in_use_now): ?>
+    <p style="color:red;">
+        ※ 現在この車両は運行中のため、状態を変更することはできません。
+    </p>
+<?php elseif ($has_future_reservation): ?>
+    <p style="color:red;">
+        ※ この車両は今後の予約に割り当てられています。<br>
+        先に予約の配車変更を行ってから、車両状態を変更してください。
+    </p>
+<?php endif; ?>
 
-    <form method="post">
+<form method="post">
 
-        <div class="radio-row">
+<?php foreach ($states as $state => $color): ?>
+    <div class="radio-option">
+        <input type="radio"
+               class="radio-btn"
+               name="vehicle_state"
+               value="<?= $state ?>"
+               <?= ($vehicle["vehicle_state"] === $state) ? "checked" : "" ?>
+               <?= $can_change_state ? "" : "disabled" ?>>
+        <span class="label-<?= $color ?>"><?= $state ?></span>
+    </div>
+<?php endforeach; ?>
 
-            <!-- 運行中の場合は radio すべて disabled -->
-            <?php if ($is_running): ?>
-                <p style="margin: 15px 0; font-size:15px; color:red;">
-                    ※ 現在「運行中」のため、状態を変更することはできません。
-                </p>
-            <?php endif; ?>
+<div class="notice">
+※ 車両状態は「現在未使用」かつ「今後の予約が無い」場合のみ変更可能です。
+</div>
 
-            <?php foreach ($states as $state => $color): ?>
-                <div class="radio-option">
-                    <input type="radio"
-                           class="radio-btn"
-                           name="vehicle_state"
-                           value="<?= $state ?>"
-                           <?= ($vehicle["vehicle_state"] === $state) ? "checked" : "" ?>
-                           <?= $is_running ? "disabled" : "" ?>>
-                    <span class="label-<?= $color ?>">
-                        <?= $state ?>
-                    </span>
-                </div>
-            <?php endforeach; ?>
+<div class="btn-area">
+<?php if ($can_change_state): ?>
+    <button class="update-btn" type="submit">状態を更新する</button>
+<?php else: ?>
+    <button class="update-btn" type="button" disabled style="opacity:0.5;">
+        状態を更新する
+    </button>
+<?php endif; ?>
 
-        </div>
+<a class="back-btn" href="javascript:history.back();">戻る</a>
+</div>
 
-        <div class="notice">
-            ※注意事項<br>
-            現在「運行中」の場合は、状態を変更することはできません。<br>
-            現在「空車」ですが、今後の予約に割り当てた場合は、状態変更時に該当予約の車両変更手続きが必要です。
-        </div>
-
-        <div class="btn-area">
-            <?php if (!$is_running): ?>
-                <button class="update-btn" type="submit">状態を更新する</button>
-            <?php else: ?>
-                <button class="update-btn" type="button" disabled style="opacity:0.5;">状態を更新する</button>
-            <?php endif; ?>
-
-            <a class="back-btn" href="javascript:history.back();">戻る</a>
-        </div>
-
-    </form>
-
+</form>
 </div>
 
 <?php require_once __DIR__ . "/includes/footer.php"; ?>
