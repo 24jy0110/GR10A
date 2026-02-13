@@ -42,26 +42,23 @@ $end_date    = $res["service_end_date"];
    同じ車種の空車のみ取得
 --------------------------------------------------- */
 $sql_vehicle = "
-SELECT 
-    v.number_plate,
-    v.car_model_code,
-
-    (
-        SELECT COUNT(*)
-        FROM reservation r2
-        WHERE r2.number_plate = v.number_plate
-          AND r2.reservation_number != :res_no
-          AND r2.service_start_time <= :end_date
-          AND r2.service_end_date >= :start_date
-    ) AS used_count
-
+SELECT v.number_plate
 FROM vehicle v
 WHERE v.sales_office_code = :office
   AND v.car_model_code = :model
+  AND v.vehicle_state = '空車'
+  AND v.number_plate NOT IN (
+        SELECT r2.number_plate
+        FROM reservation r2
+        WHERE r2.reservation_number != :res_no
+          AND r2.state_code IN ('STC02','STC04')
+          AND r2.service_start_time <= :end_date
+          AND r2.service_end_date >= :start_date
+  )
   AND ( :current_plate IS NULL OR v.number_plate <> :current_plate )
 ORDER BY v.number_plate
-
 ";
+
 
 $stmt2 = $pdo->prepare($sql_vehicle);
 $stmt2->execute([
@@ -174,26 +171,30 @@ $vehicles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                 <th>状態</th>
                 <th>操作</th>
             </tr>
-
-            <?php foreach ($vehicles as $v): ?>
-                <?php
-                if ($v["used_count"] > 0) {
-                    continue; // ★ 使用中の車両は表示しない
-                }
-                ?>
+            <?php if (count($vehicles) === 0): ?>
                 <tr>
-                    <td><?= htmlspecialchars($v["number_plate"]) ?></td>
-                    <td>
-                        <span style="color:green;font-weight:bold;">空車</span>
-                    </td>
-                    <td>
-                        <a class="btn-select"
-                            href="uw113_04_change_vehicle_confirm.php?r=<?= $resNo ?>&car=<?= urlencode($v["number_plate"]) ?>">
-                            選択
-                        </a>
+                    <td colspan="3" style="padding:40px; color:#888; text-align:center;">
+                        条件に一致する空車はありません。
                     </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php else: ?>
+
+                <?php foreach ($vehicles as $v): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($v["number_plate"]) ?></td>
+                        <td>
+                            <span style="color:green;font-weight:bold;">空車</span>
+                        </td>
+                        <td>
+                            <a class="btn-select"
+                                href="uw113_04_change_vehicle_confirm.php?r=<?= $resNo ?>&car=<?= urlencode($v["number_plate"]) ?>">
+                                選択
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+
+            <?php endif; ?>
 
 
         </table>
