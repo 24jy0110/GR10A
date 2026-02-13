@@ -260,35 +260,101 @@ $offices   = $pdo->query("SELECT sales_office_code, sales_office_name FROM sales
      Main List
 ---------------------------------------------- -->
 <table class="table">
+<?php
+$hasData = ($total > 0);
+?>
+
+<div style="margin-bottom:10px; font-weight:bold;">
+    検索結果：<?= $total ?>件
+</div>
+
+<table class="table">
 <tr>
-    <th><a href="?sort=reservation_number&order=<?= $order==='asc'?'desc':'asc' ?>">予約番号</a></th>
-    <th><a href="?sort=service_start_time&order=<?= $order==='asc'?'desc':'asc' ?>">乗車日時</a></th>
-    <th>乗車場所</th>
-    <th>降車場所</th>
-    <th><a href="?sort=customer_name&order=<?= $order==='asc'?'desc':'asc' ?>">顧客名</a></th>
-    <th>車種 / 人数</th>
-    <th><a href="?sort=state_code&order=<?= $order==='asc'?'desc':'asc' ?>">状態</a></th>
-    <th>操作</th>
+
+<th>
+<?php if ($hasData): ?>
+<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'reservation_number','order'=>$order==='asc'?'desc':'asc'])) ?>">
+予約番号
+</a>
+<?php else: ?>予約番号<?php endif; ?>
+</th>
+
+<th>
+<?php if ($hasData): ?>
+<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'service_start_time','order'=>$order==='asc'?'desc':'asc'])) ?>">
+乗車日時
+</a>
+<?php else: ?>乗車日時<?php endif; ?>
+</th>
+
+<th>乗車場所</th>
+<th>降車場所</th>
+
+<th>
+<?php if ($hasData): ?>
+<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'customer_name','order'=>$order==='asc'?'desc':'asc'])) ?>">
+顧客名
+</a>
+<?php else: ?>顧客名<?php endif; ?>
+</th>
+
+<th>車種 / 人数</th>
+
+<th>
+<?php if ($hasData): ?>
+<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'state_code','order'=>$order==='asc'?'desc':'asc'])) ?>">
+状態
+</a>
+<?php else: ?>状態<?php endif; ?>
+</th>
+
+<th>操作</th>
 </tr>
+
+<?php if (!$hasData): ?>
+<tr>
+<td colspan="8" style="text-align:center; padding:40px; color:#888;">
+該当する予約はありません。
+</td>
+</tr>
+<?php else: ?>
 
 <?php foreach ($resList as $r): ?>
 <tr>
-    <td><?= htmlspecialchars($r['reservation_number']) ?></td>
-    <td><?= date("Y/m/d H:i", strtotime($r["service_start_time"])) ?></td>
-    <td><?= htmlspecialchars($r['ride_location']) ?></td>
-    <td><?= htmlspecialchars($r['drop_off_location']) ?></td>
-    <td><?= htmlspecialchars($r['customer_name']) ?></td>
-    <td><?= htmlspecialchars($r['car_model_name'] . " / " . $r['ride_count']) ?></td>
-    <td>
-        <span class="badge badge-<?= $r['state_code'] ?>">
-            <?= htmlspecialchars($r['state_name']) ?>
-        </span>
-    </td>
-    <td>
-        <a class="detail-btn" href="uw113_02_reservation_detail.php?r=<?= urlencode($r['reservation_number']) ?>">詳細</a>
-    </td>
+<td><?= htmlspecialchars($r['reservation_number']) ?></td>
+<td><?= date("Y/m/d H:i", strtotime($r["service_start_time"])) ?></td>
+<td><?= htmlspecialchars($r['ride_location']) ?></td>
+<td><?= htmlspecialchars($r['drop_off_location']) ?></td>
+<td><?= htmlspecialchars($r['customer_name']) ?></td>
+<td><?= htmlspecialchars($r['car_model_name'] . " / " . $r['ride_count']) ?></td>
+<td>
+<span class="badge badge-<?= $r['state_code'] ?>">
+<?= htmlspecialchars($r['state_name']) ?>
+</span>
+</td>
+<td>
+<a class="detail-btn"
+href="uw113_02_reservation_detail.php?r=<?= urlencode($r['reservation_number']) ?>">
+詳細
+</a>
+</td>
 </tr>
 <?php endforeach; ?>
+
+<?php endif; ?>
+</table>
+
+<?php if ($hasData && $pages > 1): ?>
+<div class="pager">
+<?php for ($i=1; $i <= $pages; $i++): ?>
+<a href="?<?= http_build_query(array_merge($_GET, ['page'=>$i])) ?>"
+   style="<?= $i==$page ? 'background:#000;color:#fff;' : '' ?>">
+<?= $i ?>
+</a>
+<?php endfor; ?>
+</div>
+<?php endif; ?>
+
 
 </table>
 
