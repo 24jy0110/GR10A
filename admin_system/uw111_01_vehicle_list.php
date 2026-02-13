@@ -148,6 +148,7 @@ if ($total_pages > 0 && $page > $total_pages) {
         color: #fff;
         text-decoration: none;
         border-radius: 5px;
+        margin-top: 30px;
         margin-bottom: 18px;
     }
 
