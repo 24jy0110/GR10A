@@ -149,7 +149,9 @@ $langs     = $pdo->query("SELECT language_category_id, language_category_name FR
     padding: 20px;
     background: #f9f9f9;
     border-radius: 8px;
+    align-items: flex-end;
 }
+
 
 .search-group {
     display: flex;
@@ -366,7 +368,7 @@ $langs     = $pdo->query("SELECT language_category_id, language_category_name FR
     </div>
     <?php endif; ?>
 
-    <div>
+    <div style="margin-left:auto;">
         <button class="search-btn">検索</button>
     </div>
 
