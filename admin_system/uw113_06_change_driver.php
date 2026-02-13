@@ -50,28 +50,24 @@ $sql_driver = "
 SELECT 
     d.employee_id,
     e.employee_name,
-    e.sales_office_code,
-
     d.language_id_1,
     d.language_id_2,
-    d.language_id_3,
-
-    (
-        SELECT COUNT(*)
-        FROM reservation r2
-        WHERE r2.driver_id = d.employee_id
-          AND r2.reservation_number != :res_no
-          AND r2.service_start_time <= :end_date
-          AND r2.service_end_date   >= :start_date
-    ) AS used_count
-
+    d.language_id_3
 FROM driver d
 JOIN employee e ON e.employee_id = d.employee_id
 WHERE e.sales_office_code = :office
   AND ( :current_driver IS NULL OR d.employee_id <> :current_driver )
+  AND d.employee_id NOT IN (
+        SELECT r2.driver_id
+        FROM reservation r2
+        WHERE r2.reservation_number != :res_no
+          AND r2.state_code IN ('STC02','STC04')
+          AND r2.service_start_time <= :end_date
+          AND r2.service_end_date   >= :start_date
+  )
 ORDER BY d.employee_id
-
 ";
+
 
 $stmt2 = $pdo->prepare($sql_driver);
 $stmt2->execute([
@@ -109,8 +105,6 @@ $group_full = [];
 $group_main = [];
 
 foreach ($drivers as $d) {
-
-    if ($d["used_count"] > 0) continue; // スケジュール重複 → NG
 
     $langs = array_filter([
         $d["language_id_1"],
