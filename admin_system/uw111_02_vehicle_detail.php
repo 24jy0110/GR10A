@@ -181,7 +181,8 @@ $future_count = count($future_reservations);
 
                 <div class="info-row" style="margin-bottom:12px;">
 
-                    ● <?= htmlspecialchars($res["reservation_date"]) ?>
+                <?= htmlspecialchars($res["service_start_time"]) ?>
+
 
                     &nbsp;&nbsp;
 
