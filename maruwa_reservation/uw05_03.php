@@ -60,12 +60,12 @@ $dropText   = trim("{$res['drop_pref']} {$res['drop_city']} {$res['drop_detail']
    言語名称（LCAT → 名称）
 ================================================ */
 $langMap = [
-    'LCAT02' => '英語',
-    'LCAT03' => '中国語',
-    'LCAT04' => '韓国語',
-    'LCAT05' => 'ドイツ語',
-    'LCAT06' => 'スペイン語',
-    'LCAT07' => 'フランス語',
+    'LCAT01' => '英語',
+    'LCAT02' => '中国語',
+    'LCAT03' => '韓国語',
+    'LCAT04' => 'ドイツ語',
+    'LCAT05' => 'スペイン語',
+    'LCAT06' => 'フランス語',
 ];
 
 $lang1 = $langMap[$res['lang_pref_1']] ?? '日本語';

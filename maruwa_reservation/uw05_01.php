@@ -163,22 +163,22 @@ select,input {width:100%;max-width:360px;padding:6px}
         <td>
           <select name="lang_pref_1" required>
             <option value="">第一希望</option>
-            <option value="LCAT02">英語</option>
-            <option value="LCAT03">中国語</option>
-            <option value="LCAT04">韓国語</option>
-            <option value="LCAT05">ドイツ語</option>
-            <option value="LCAT06">スペイン語</option>
-            <option value="LCAT07">フランス語</option>
+            <option value="LCAT01">英語</option>
+            <option value="LCAT02">中国語</option>
+            <option value="LCAT03">韓国語</option>
+            <option value="LCAT04">ドイツ語</option>
+            <option value="LCAT05">スペイン語</option>
+            <option value="LCAT06">フランス語</option>
           </select>
 
           <select name="lang_pref_2">
             <option value="">第二希望（任意）</option>
-            <option value="LCAT02">英語</option>
-            <option value="LCAT03">中国語</option>
-            <option value="LCAT04">韓国語</option>
-            <option value="LCAT05">ドイツ語</option>
-            <option value="LCAT06">スペイン語</option>
-            <option value="LCAT07">フランス語</option>
+            <option value="LCAT01">英語</option>
+            <option value="LCAT02">中国語</option>
+            <option value="LCAT03">韓国語</option>
+            <option value="LCAT04">ドイツ語</option>
+            <option value="LCAT05">スペイン語</option>
+            <option value="LCAT06">フランス語</option>
             <option value="NONE">なし</option>
           </select>
         </td>
