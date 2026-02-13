@@ -85,9 +85,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 ?>
-
-?>
-
 <style>
 .container {
     width: 90%;
