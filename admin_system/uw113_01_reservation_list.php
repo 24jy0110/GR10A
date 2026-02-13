@@ -66,30 +66,18 @@ if (!empty($lang)) {
     $params[':lang'] = $lang;
 }
 
-/* office filter rules */
+/* office rules */
 if ($job_code === "02") {
-    /* 配車センター → 自分の営業所のみ */
     $where .= " AND r.sales_office_code = :office_fix ";
     $params[':office_fix'] = $sales_office;
 } elseif ($job_code === "01") {
-    /* 受付 → 全営業所を閲覧可能 */
     if (!empty($office_sel)) {
         $where .= " AND r.sales_office_code = :office_sel ";
         $params[':office_sel'] = $office_sel;
     }
 } else {
-    /* 03 ドライバー → アクセス拒否 */
     die("アクセス権限がありません。");
 }
-
-/* ----------------------------------------------
-   sorting
----------------------------------------------- */
-$sortable = ["reservation_number", "service_start_time", "customer_name", "state_code"];
-$sort = $_GET['sort'] ?? "service_start_time";
-$order = ($_GET['order'] ?? "asc") === "desc" ? "desc" : "asc";
-
-if (!in_array($sort, $sortable)) $sort = "service_start_time";
 
 /* ----------------------------------------------
    pagination
@@ -116,12 +104,14 @@ FROM reservation r
 LEFT JOIN reservation_state s ON r.state_code = s.state_code
 LEFT JOIN car_model cm ON r.car_model_code = cm.car_model_code
 $where
-ORDER BY $sort $order
+ORDER BY r.service_start_time ASC
 LIMIT :limit OFFSET :offset
 ";
 
 $stmt = $pdo->prepare($sql);
-foreach ($params as $k => $v) $stmt->bindValue($k, $v);
+foreach ($params as $k => $v) {
+    $stmt->bindValue($k, $v);
+}
 $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
 $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -136,8 +126,11 @@ FROM reservation r
 LEFT JOIN car_model cm ON r.car_model_code = cm.car_model_code
 $where
 ";
+
 $count_stmt = $pdo->prepare($count_sql);
-foreach ($params as $k => $v) $count_stmt->bindValue($k, $v);
+foreach ($params as $k => $v) {
+    $count_stmt->bindValue($k, $v);
+}
 $count_stmt->execute();
 $total = $count_stmt->fetchColumn();
 $pages = ceil($total / $limit);
@@ -148,7 +141,10 @@ $pages = ceil($total / $limit);
 $carModels = $pdo->query("SELECT car_model_code, car_model_name FROM car_model")->fetchAll();
 $langs     = $pdo->query("SELECT language_category_id, language_category_name FROM language_category")->fetchAll();
 $offices   = $pdo->query("SELECT sales_office_code, sales_office_name FROM sales_office")->fetchAll();
+
+$hasData = ($total > 0);
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -174,7 +170,16 @@ $offices   = $pdo->query("SELECT sales_office_code, sales_office_name FROM sales
 .table th { background:#f7f7f7; }
 
 .pager { margin-top:20px; text-align:center; }
-.pager a { padding:6px 10px; margin:0 3px; border:1px solid #000; text-decoration:none; }
+.pager a {
+    padding:6px 10px;
+    margin:0 3px;
+    border:1px solid #000;
+    text-decoration:none;
+}
+.pager a.active {
+    background:#000;
+    color:#fff;
+}
 
 .detail-btn {
     display:inline-block;
@@ -184,6 +189,7 @@ $offices   = $pdo->query("SELECT sales_office_code, sales_office_name FROM sales
     border-radius:4px;
     text-decoration:none;
 }
+
 .back-btn {
     display:inline-block;
     margin-top:20px;
@@ -203,111 +209,70 @@ $offices   = $pdo->query("SELECT sales_office_code, sales_office_name FROM sales
 
 <div class="page-title">配車予定一覧</div>
 
-<!-- ----------------------------------------------
-     Search Form
----------------------------------------------- -->
+<!-- 検索フォーム -->
 <form method="get" class="search-box">
 
-    <input type="text" name="keyword" class="search-input"
-        placeholder="予約番号 / 氏名 / 上車 / 下車 / 車種 / ナンバープレート"
-        value="<?= htmlspecialchars($keyword) ?>">
+<input type="text" name="keyword" class="search-input"
+placeholder="予約番号 / 氏名 / 上車 / 下車 / 車種 / ナンバープレート"
+value="<?= htmlspecialchars($keyword) ?>">
 
-    <input type="date" name="date_start" value="<?= htmlspecialchars($date_start) ?>">
-    <input type="date" name="date_end" value="<?= htmlspecialchars($date_end) ?>">
+<input type="date" name="date_start" value="<?= htmlspecialchars($date_start) ?>">
+<input type="date" name="date_end" value="<?= htmlspecialchars($date_end) ?>">
 
-    <select name="state">
-        <option value="">状態（すべて）</option>
-        <option value="STC01" <?= $state==='STC01'?'selected':'' ?>>仮予約</option>
-        <option value="STC02" <?= $state==='STC02'?'selected':'' ?>>予約確定</option>
-        <option value="STC04" <?= $state==='STC04'?'selected':'' ?>>運行中</option>
-        <option value="STC05" <?= $state==='STC05'?'selected':'' ?>>完了</option>
-        <option value="STC03" <?= $state==='STC03'?'selected':'' ?>>キャンセル</option>
-    </select>
+<select name="state">
+<option value="">状態（すべて）</option>
+<option value="STC01" <?= $state==='STC01'?'selected':'' ?>>仮予約</option>
+<option value="STC02" <?= $state==='STC02'?'selected':'' ?>>予約確定</option>
+<option value="STC04" <?= $state==='STC04'?'selected':'' ?>>運行中</option>
+<option value="STC05" <?= $state==='STC05'?'selected':'' ?>>完了</option>
+<option value="STC03" <?= $state==='STC03'?'selected':'' ?>>キャンセル</option>
+</select>
 
-    <select name="car_model">
-        <option value="">車種（すべて）</option>
-        <?php foreach ($carModels as $cm): ?>
-            <option value="<?= $cm['car_model_code'] ?>" <?= $car_model===$cm['car_model_code']?'selected':'' ?>>
-                <?= htmlspecialchars($cm['car_model_name']) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+<select name="car_model">
+<option value="">車種（すべて）</option>
+<?php foreach ($carModels as $cm): ?>
+<option value="<?= $cm['car_model_code'] ?>" <?= $car_model===$cm['car_model_code']?'selected':'' ?>>
+<?= htmlspecialchars($cm['car_model_name']) ?>
+</option>
+<?php endforeach; ?>
+</select>
 
-    <select name="lang">
-        <option value="">言語（すべて）</option>
-        <?php foreach ($langs as $lg): ?>
-            <option value="<?= $lg['language_category_id'] ?>" <?= $lang===$lg['language_category_id']?'selected':'' ?>>
-                <?= htmlspecialchars($lg['language_category_name']) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+<select name="lang">
+<option value="">言語（すべて）</option>
+<?php foreach ($langs as $lg): ?>
+<option value="<?= $lg['language_category_id'] ?>" <?= $lang===$lg['language_category_id']?'selected':'' ?>>
+<?= htmlspecialchars($lg['language_category_name']) ?>
+</option>
+<?php endforeach; ?>
+</select>
 
-    <?php if ($job_code === "01"): ?>
-        <select name="office">
-            <option value="">営業所（すべて）</option>
-            <?php foreach ($offices as $of): ?>
-                <option value="<?= $of['sales_office_code'] ?>" <?= $office_sel===$of['sales_office_code']?'selected':'' ?>>
-                    <?= htmlspecialchars($of['sales_office_name']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    <?php endif; ?>
+<?php if ($job_code === "01"): ?>
+<select name="office">
+<option value="">営業所（すべて）</option>
+<?php foreach ($offices as $of): ?>
+<option value="<?= $of['sales_office_code'] ?>" <?= $office_sel===$of['sales_office_code']?'selected':'' ?>>
+<?= htmlspecialchars($of['sales_office_name']) ?>
+</option>
+<?php endforeach; ?>
+</select>
+<?php endif; ?>
 
-    <button class="search-btn">検索</button>
+<button class="search-btn">検索</button>
 </form>
 
-<!-- ----------------------------------------------
-     Main List
----------------------------------------------- -->
-<table class="table">
-<?php
-$hasData = ($total > 0);
-?>
-
 <div style="margin-bottom:10px; font-weight:bold;">
-    検索結果：<?= $total ?>件
+検索結果：<?= $total ?>件
 </div>
 
 <table class="table">
 <tr>
-
-<th>
-<?php if ($hasData): ?>
-<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'reservation_number','order'=>$order==='asc'?'desc':'asc'])) ?>">
-予約番号
-</a>
-<?php else: ?>予約番号<?php endif; ?>
-</th>
-
-<th>
-<?php if ($hasData): ?>
-<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'service_start_time','order'=>$order==='asc'?'desc':'asc'])) ?>">
-乗車日時
-</a>
-<?php else: ?>乗車日時<?php endif; ?>
-</th>
-
+<th>予約番号</th>
+<th>乗車日時</th>
 <th>乗車場所</th>
 <th>降車場所</th>
-
-<th>
-<?php if ($hasData): ?>
-<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'customer_name','order'=>$order==='asc'?'desc':'asc'])) ?>">
-顧客名
-</a>
-<?php else: ?>顧客名<?php endif; ?>
-</th>
-
+<th>顧客名</th>
 <th>車種 / 人数</th>
-
-<th>
-<?php if ($hasData): ?>
-<a href="?<?= http_build_query(array_merge($_GET, ['sort'=>'state_code','order'=>$order==='asc'?'desc':'asc'])) ?>">
-状態
-</a>
-<?php else: ?>状態<?php endif; ?>
-</th>
-
+<th>状態</th>
 <th>操作</th>
 </tr>
 
@@ -318,7 +283,6 @@ $hasData = ($total > 0);
 </td>
 </tr>
 <?php else: ?>
-
 <?php foreach ($resList as $r): ?>
 <tr>
 <td><?= htmlspecialchars($r['reservation_number']) ?></td>
@@ -340,32 +304,19 @@ href="uw113_02_reservation_detail.php?r=<?= urlencode($r['reservation_number']) 
 </td>
 </tr>
 <?php endforeach; ?>
-
 <?php endif; ?>
 </table>
 
 <?php if ($hasData && $pages > 1): ?>
 <div class="pager">
 <?php for ($i=1; $i <= $pages; $i++): ?>
-<a href="?<?= http_build_query(array_merge($_GET, ['page'=>$i])) ?>"
-   style="<?= $i==$page ? 'background:#000;color:#fff;' : '' ?>">
+<a class="<?= $i==$page ? 'active' : '' ?>"
+href="?<?= http_build_query(array_merge($_GET, ['page'=>$i])) ?>">
 <?= $i ?>
 </a>
 <?php endfor; ?>
 </div>
 <?php endif; ?>
-
-
-</table>
-
-<!-- ----------------------------------------------
-     Pagination
----------------------------------------------- -->
-<div class="pager">
-<?php for ($i=1; $i <= $pages; $i++): ?>
-    <a href="?page=<?= $i ?>&keyword=<?= htmlspecialchars($keyword) ?>"><?= $i ?></a>
-<?php endfor; ?>
-</div>
 
 <a href="uw110.php" class="back-btn">戻る</a>
 

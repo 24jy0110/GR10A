@@ -80,17 +80,6 @@ if ($job_code === "02") {
 }
 
 /* ============================================================
-   sorting
-============================================================ */
-$sortable = ["reservation_number", "service_start_time", "customer_name", "state_code"];
-$sort = $_GET['sort'] ?? "service_start_time";
-$order = ($_GET['order'] ?? "asc") === "desc" ? "desc" : "asc";
-
-if (!in_array($sort, $sortable)) {
-    $sort = "service_start_time";
-}
-
-/* ============================================================
    pagination
 ============================================================ */
 $limit = 10;
@@ -116,7 +105,7 @@ FROM reservation r
 LEFT JOIN reservation_state s ON r.state_code = s.state_code
 LEFT JOIN car_model cm ON r.car_model_code = cm.car_model_code    /* ★ FIXED */
 $where
-ORDER BY $sort $order
+ORDER BY r.service_start_time ASC
 LIMIT :limit OFFSET :offset
 ";
 
@@ -252,13 +241,13 @@ $langs     = $pdo->query("SELECT language_category_id, language_category_name FR
 ============================================================ -->
 <table class="table">
 <tr>
-    <th><a href="?sort=reservation_number&order=<?= $order==='asc'?'desc':'asc' ?>">予約番号</a></th>
-    <th><a href="?sort=service_start_time&order=<?= $order==='asc'?'desc':'asc' ?>">乗車日時</a></th>
+    <th>予約番号</a></th>
+    <th>乗車日時</a></th>
     <th>乗車場所</th>
     <th>降車場所</th>
-    <th><a href="?sort=customer_name&order=<?= $order==='asc'?'desc':'asc' ?>">顧客名</a></th>
+    <th>顧客名</a></th>
     <th>車種 / 人数</th>
-    <th><a href="?sort=state_code&order=<?= $order==='asc'?'desc':'asc' ?>">状態</a></th>
+    <th>状態</a></th>
     <th>操作</th>
 </tr>
 
