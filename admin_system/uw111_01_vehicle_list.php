@@ -218,6 +218,7 @@ if ($total_pages > 0 && $page > $total_pages) {
 
     .bottom-btn {
         margin-top: 25px;
+        margin-bottom: 20px;
         padding: 10px 18px;
         background: #067a0b;
         color: #fff;
@@ -260,16 +261,12 @@ if ($total_pages > 0 && $page > $total_pages) {
 
 <div class="container">
 
-    <!-- 返回配車センター -->
-    <a class="return-btn" href="uw110.php">← 戻る（配車センター）</a>
-
     <h2>車両ステータス一覧</h2>
+    <a class="bottom-btn" href="uw111_04_vehicle_add.php">車両を登録する</a>
 
-    <!-- 搜索区域 -->
     <form method="get" class="search-box">
         <div class="search-row">
 
-            <!-- 营业所 -->
             <div class="search-item">
                 <label>営業所：</label>
                 <select name="sales_office_code">
@@ -283,7 +280,7 @@ if ($total_pages > 0 && $page > $total_pages) {
                 </select>
             </div>
 
-            <!-- 状态 -->
+
             <div class="search-item">
                 <label>状態：</label>
                 <select name="vehicle_state">
@@ -296,7 +293,7 @@ if ($total_pages > 0 && $page > $total_pages) {
                 </select>
             </div>
 
-            <!-- 车型 -->
+
             <div class="search-item">
                 <label>車種：</label>
                 <select name="car_model_code">
@@ -312,7 +309,7 @@ if ($total_pages > 0 && $page > $total_pages) {
 
         </div>
 
-        <!-- 关键字 -->
+
         <div class="search-row">
             <div class="search-item">
                 <label>キーワード：</label>
@@ -324,7 +321,7 @@ if ($total_pages > 0 && $page > $total_pages) {
     </form>
 
 
-    <!-- 表格显示 -->
+
     <table>
         <tr>
             <th>ナンバープレート</th>
@@ -361,16 +358,16 @@ if ($total_pages > 0 && $page > $total_pages) {
     </table>
 
 
-    <!-- 分页 -->
+
     <?php if ($total_pages > 1): ?>
         <div class="pagination">
             <?php
-            $range = 2; // 当前页前后显示的页数
+            $range = 2;
 
             $start = max(1, $page - $range);
             $end   = min($total_pages, $page + $range);
 
-            /* ---------- 首页 ---------- */
+
             if ($start > 1) {
                 echo '<a class="page-btn" href="' . buildPageUrl(1) . '">1</a>';
                 if ($start > 2) {
@@ -378,7 +375,7 @@ if ($total_pages > 0 && $page > $total_pages) {
                 }
             }
 
-            /* ---------- 中间页 ---------- */
+
             for ($i = $start; $i <= $end; $i++) {
                 if ($i == $page) {
                     echo '<span class="page-btn active">' . $i . '</span>';
@@ -387,7 +384,7 @@ if ($total_pages > 0 && $page > $total_pages) {
                 }
             }
 
-            /* ---------- 尾页 ---------- */
+
             if ($end < $total_pages) {
                 if ($end < $total_pages - 1) {
                     echo '<span class="page-ellipsis">...</span>';
@@ -401,8 +398,8 @@ if ($total_pages > 0 && $page > $total_pages) {
 
 
 
-    <!-- 下方按钮：车辆登记 -->
-    <a class="bottom-btn" href="uw111_04_vehicle_add.php">車両を登録する</a>
+    <a class="return-btn" href="uw110.php">← 戻る（配車センター）</a>
+
 
 </div>
 
