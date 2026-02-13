@@ -56,7 +56,7 @@ $future_reserve_count = (int)$stmt->fetchColumn();
 /* -----------------------------
    状態判定
 ----------------------------- */
-$is_in_use_now = ($vehicle["vehicle_state"] === "使用中");
+$is_in_use_now = ($vehicle["vehicle_state"] === "運行中");
 $has_future_reservation = ($future_reserve_count > 0);
 $can_change_state = !$is_in_use_now && !$has_future_reservation;
 
