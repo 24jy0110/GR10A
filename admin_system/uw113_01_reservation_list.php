@@ -213,7 +213,7 @@ $hasData = ($total > 0);
 <form method="get" class="search-box">
 
 <input type="text" name="keyword" class="search-input"
-placeholder="予約番号 / 氏名 / 上車 / 下車 / 車種 / ナンバープレート"
+placeholder="予約番号 / 氏名 / 乗車 / 降車 / 車種 / ナンバープレート"
 value="<?= htmlspecialchars($keyword) ?>">
 
 <input type="date" name="date_start" value="<?= htmlspecialchars($date_start) ?>">
