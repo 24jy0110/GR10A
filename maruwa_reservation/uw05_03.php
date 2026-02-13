@@ -189,7 +189,7 @@ input {
 
 <tr>
   <th>お名前（カタカナ）</th>
-  <td><input name="customer_name_kana"></td>
+  <td><input name="customer_name_kana" pattern="^[ァ-ヶー　]+$"></td>
 </tr>
 
 <tr>
