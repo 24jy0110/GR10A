@@ -21,13 +21,13 @@ $resNo = $_GET['r'];
    言語マップ
 --------------------------------------------------- */
 $langMap = [
-    "LCAT01" => "日本語",
-    "LCAT02" => "英語",
-    "LCAT03" => "中国語",
-    "LCAT04" => "韓国語",
-    "LCAT05" => "ドイツ語",
-    "LCAT06" => "スペイン語",
-    "LCAT07" => "フランス語"
+    "LCAT00" => "日本語",
+    "LCAT01" => "英語",
+    "LCAT02" => "中国語",
+    "LCAT03" => "韓国語",
+    "LCAT04" => "ドイツ語",
+    "LCAT05" => "スペイン語",
+    "LCAT06" => "フランス語"
 ];
 
 /* ---------------------------------------------------
@@ -81,13 +81,16 @@ $driverName  = $res["driver_name"] ?: "未定";
 $driverEmail = $res["driver_email"] ?: "未定";
 
 /* 言語 */
-$langs = [];
-foreach (["language_id_1","language_id_2","language_id_3"] as $col) {
+$requestLangs = [];
+
+foreach (["lang_pref_1","lang_pref_2"] as $col) {
     if (!empty($res[$col]) && isset($langMap[$res[$col]])) {
-        $langs[] = $langMap[$res[$col]];
+        $requestLangs[] = $langMap[$res[$col]];
     }
 }
-$driverLangText = $langs ? implode(" / ", $langs) : "未定";
+
+$requestLangText = $requestLangs ? implode(" / ", $requestLangs) : "指定なし";
+
 
 /* 状態色 */
 $stateColor = [
@@ -190,7 +193,7 @@ function cancelReserve(no) {
         <tr><th>ナンバープレート</th><td><?= htmlspecialchars($res["number_plate"] ?: "未定") ?></td></tr>
         <tr><th>ドライバー名</th><td><?= htmlspecialchars($driverName) ?></td></tr>
         <tr><th>連絡先</th><td><?= htmlspecialchars($driverEmail) ?></td></tr>
-        <tr><th>対応言語</th><td><?= htmlspecialchars($driverLangText) ?></td></tr>
+        <tr><th>希望言語</th><td><?= htmlspecialchars($requestLangText) ?></td></tr>
         <tr><th>合計料金</th><td><?= number_format($res["usage_fee"]) ?> 円</td></tr>
     </table>
 
