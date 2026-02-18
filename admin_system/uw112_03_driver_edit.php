@@ -220,7 +220,7 @@ function checkLimit() {
 
 <br>
 <button type="submit" class="btn-blue">確認する</button>
-<a class="btn" href="uw112_02_driver_detail.php?employee_id=<?= $driver['employee_id'] ?>">戻る</a>
+<a class="btn" href="uw115_02_driver_detail.php?employee_id=<?= $driver['employee_id'] ?>">戻る</a>
 
 </form>
 

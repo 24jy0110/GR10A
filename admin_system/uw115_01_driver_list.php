@@ -206,7 +206,7 @@ input[type=text], select {
     </td>
     <td>
         <a class="btn-detail"
-           href="uw112_02_driver_detail.php?employee_id=<?= $d['employee_id'] ?>">
+           href="uw115_02_driver_detail.php?employee_id=<?= $d['employee_id'] ?>">
            詳細
         </a>
     </td>

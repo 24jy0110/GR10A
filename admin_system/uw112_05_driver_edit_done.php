@@ -98,7 +98,7 @@ h1 {
 
 <h1>ドライバー情報の更新が完了しました</h1>
 
-<a class="btn" href="uw112_02_driver_detail.php?employee_id=<?= htmlspecialchars($employee_id) ?>">
+<a class="btn" href="uw115_02_driver_detail.php?employee_id=<?= htmlspecialchars($employee_id) ?>">
     ドライバー情報へ戻る
 </a>
 
