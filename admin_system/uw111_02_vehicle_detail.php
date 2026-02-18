@@ -196,7 +196,7 @@ $future_count = count($future_reservations);
                     &nbsp;&nbsp;
 
                     <a class="detail-btn"
-                        href="uw111_06_reservation_detail.php?reservation_number=<?= urlencode($res['reservation_number']) ?>">
+                        href="uw112_01_reservation_detail.php?reservation_number=<?= urlencode($res['reservation_number']) ?>">
                         詳細
                     </a>
 
@@ -210,7 +210,7 @@ $future_count = count($future_reservations);
   
     <div>
         <a class="state-update-btn"
-            href="uw111_03_vehicle_update.php?number_plate=<?= urlencode($number_plate) ?>">
+            href="uw113_01_vehicle_update.php?number_plate=<?= urlencode($number_plate) ?>">
             車両状態を更新する
         </a>
         <a class="edit-btn"

@@ -57,7 +57,7 @@ $data = $_SESSION["vehicle_state_edit"];
         <p><strong>変更後：</strong>
             <?= htmlspecialchars($data["new_state"]) ?></p>
 
-        <form method="post" action="uw111_04_vehicle_state_done.php">
+        <form method="post" action="uw113_03_vehicle_state_done.php">
 
             <div style="margin-top:30px;">
                 <button type="button"
