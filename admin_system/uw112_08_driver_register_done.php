@@ -139,7 +139,7 @@ h1 { font-size: 26px; font-weight: 700; margin-bottom: 20px; }
 </div>
 
 
-<a href="uw112_01_driver_list.php" class="btn">ドライバー一覧へ</a>
+<a href="uw115_01_driver_list.php" class="btn">ドライバー一覧へ</a>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 

@@ -123,7 +123,7 @@ function checkLimit() {
     <input type="hidden" name="initial_password" value="<?= $initial_password ?>"><br><br>
 
     <button type="submit" class="btn-blue">確認する</button>
-    <a href="uw112_01_driver_list.php" class="btn">戻る</a>
+    <a href="uw115_01_driver_list.php" class="btn">戻る</a>
 
 </form>
 
