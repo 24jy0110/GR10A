@@ -32,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     /* ① 必填校验 */
     if ($number_plate === '' || $car_model_code === '' || $sales_office_code === '') {
         $error = "未入力の項目があります。";
-
     } else {
 
         /* ② 车牌格式校验（日本样式） */
@@ -40,7 +39,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (!preg_match($pattern, $number_plate)) {
             $error = "ナンバープレートの形式が正しくありません。（例：品川 300 あ 12-34）";
-
         } else {
 
             /* ③ 重複チェック */
@@ -51,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($exists > 0) {
                 $error = "このナンバープレートの車両は既に登録されています。";
-
             } else {
 
                 /* ④ 車種から定員取得 */
@@ -64,28 +61,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 if (!$capacity) {
                     $error = "車種情報の取得に失敗しました。";
-
                 } else {
 
-                    try {
-                        $sql = "INSERT INTO vehicle
-                                (number_plate, vehicle_capacity, vehicle_state, sales_office_code, car_model_code)
-                                VALUES
-                                (:num, :cap, '空車', :so, :cm)";
-                        $stmt = $pdo->prepare($sql);
-                        $stmt->execute([
-                            ":num" => $number_plate,
-                            ":cap" => $capacity,
-                            ":so"  => $sales_office_code,
-                            ":cm"  => $car_model_code
-                        ]);
+                    /* 格式 & 重複チェック通过后 */
 
-                        header("Location: uw111_05_vehicle_add_done.php");
-                        exit;
+                    $_SESSION["vehicle_add"] = [
+                        "number_plate"      => $number_plate,
+                        "car_model_code"    => $car_model_code,
+                        "sales_office_code" => $sales_office_code
+                    ];
 
-                    } catch (PDOException $e) {
-                        $error = "車両登録中にエラーが発生しました。";
-                    }
+                    header("Location: uw111_04_vehicle_confirm.php");
+                    exit;
                 }
             }
         }
@@ -95,71 +82,72 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 ?>
 <style>
-.container {
-    width: 90%;
-    max-width: 900px;
-    margin: 20px auto;
-    font-family: "Yu Gothic", sans-serif;
-}
+    .container {
+        width: 90%;
+        max-width: 900px;
+        margin: 20px auto;
+        font-family: "Yu Gothic", sans-serif;
+    }
 
-h2 {
-    font-size: 26px;
-    margin-bottom: 20px;
-}
+    h2 {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
 
-.form-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 25px;
-}
+    .form-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+    }
 
-.form-block {
-    width: 45%;
-}
+    .form-block {
+        width: 45%;
+    }
 
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 15px;
-}
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 15px;
+    }
 
-input[type="text"], select {
-    width: 100%;
-    padding: 8px;
-    font-size: 15px;
-    border-radius: 4px;
-    border: 1px solid #aaa;
-}
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 8px;
+        font-size: 15px;
+        border-radius: 4px;
+        border: 1px solid #aaa;
+    }
 
-.submit-btn {
-    width: 250px;
-    padding: 12px;
-    background: #000;
-    color: #fff;
-    border-radius: 6px;
-    display: block;
-    margin: 30px auto;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-}
+    .submit-btn {
+        width: 250px;
+        padding: 12px;
+        background: #000;
+        color: #fff;
+        border-radius: 6px;
+        display: block;
+        margin: 30px auto;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-.back-btn {
-    width: 200px;
-    padding: 10px;
-    background: #fff;
-    border: 1px solid #333;
-    border-radius: 6px;
-    margin: 10px auto;
-    text-align: center;
-    text-decoration: none;
-    color: #000;
-}
+    .back-btn {
+        width: 200px;
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #333;
+        border-radius: 6px;
+        margin: 10px auto;
+        text-align: center;
+        text-decoration: none;
+        color: #000;
+    }
 
-.error {
-    color: red;
-    margin-bottom: 10px;
-}
+    .error {
+        color: red;
+        margin-bottom: 10px;
+    }
 </style>
 
 <div class="container">
@@ -175,8 +163,8 @@ input[type="text"], select {
         <div class="form-row">
             <!-- 車両番号 -->
             <div class="form-block">
-                <label>ナンバープレート</label>
-                <input type="text" name="number_plate" placeholder="例）品川 300 あ 12-34">
+                <label>ナンバープレート（半角英数字と半角）</label>
+                <input type="text" name="number_plate" placeholder="※ 例：品川 300 あ 12-34（半角スペース・数字・- 使用）">
             </div>
 
             <!-- 車種 -->
