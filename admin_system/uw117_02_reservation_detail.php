@@ -193,7 +193,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; }
             <a href="uw113_03_change_vehicle.php?r=<?= $resNo ?>" class="btn-action">
                 配車を変更する
             </a>
-            <a href="uw113_06_change_driver.php?r=<?= $resNo ?>" class="btn-action">
+            <a href="uw119_01_change_driver.php?r=<?= $resNo ?>" class="btn-action">
                 ドライバーを変更する
             </a>
         <?php else: ?>

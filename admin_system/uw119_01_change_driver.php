@@ -192,7 +192,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#f5f5f5; }
                     <div class="lang"><?= htmlspecialchars(getDriverLanguages($d, $langMap)) ?></div>
                 </div>
                 <a class="btn-select"
-                   href="uw113_07_change_driver_confirm.php?r=<?= $resNo ?>&driver=<?= $d["employee_id"] ?>">
+                   href="uw119_02_change_driver_confirm.php?r=<?= $resNo ?>&driver=<?= $d["employee_id"] ?>">
                     選択
                 </a>
             </div>
@@ -215,7 +215,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#f5f5f5; }
                     <div class="lang"><?= htmlspecialchars(getDriverLanguages($d, $langMap)) ?></div>
                 </div>
                 <a class="btn-select"
-                   href="uw113_07_change_driver_confirm.php?r=<?= $resNo ?>&driver=<?= $d["employee_id"] ?>">
+                   href="uw119_02_change_driver_confirm.php?r=<?= $resNo ?>&driver=<?= $d["employee_id"] ?>">
                     選択
                 </a>
             </div>

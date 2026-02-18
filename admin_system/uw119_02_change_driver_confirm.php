@@ -150,10 +150,10 @@ table.confirm-table {
     </table>
 
     <div class="btn-area">
-        <a href="uw113_08_change_driver_done.php?r=<?= urlencode($resNo) ?>&driver=<?= urlencode($newInfo["employee_id"]) ?>"
+        <a href="uw119_03_change_driver_done.php?r=<?= urlencode($resNo) ?>&driver=<?= urlencode($newInfo["employee_id"]) ?>"
            class="btn btn-ok">確定する</a>
 
-        <a href="uw113_06_change_driver.php?r=<?= urlencode($resNo) ?>" 
+        <a href="uw119_01_change_driver.php?r=<?= urlencode($resNo) ?>" 
            class="btn btn-back">戻る</a>
     </div>
 
