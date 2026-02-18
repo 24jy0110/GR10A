@@ -35,55 +35,64 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     } else {
 
-        /* ② ナンバープレート重複チェック */
-        $sql = "SELECT COUNT(*) FROM vehicle WHERE number_plate = :num";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([":num" => $number_plate]);
-        $exists = (int)$stmt->fetchColumn();
+        /* ② 车牌格式校验（日本样式） */
+        $pattern = '/^[^\s]{2,}\s\d{3}\s[あいうえお]\s\d{2}-\d{2}$/u';
 
-        if ($exists > 0) {
-            $error = "このナンバープレートの車両は既に登録されています。";
+        if (!preg_match($pattern, $number_plate)) {
+            $error = "ナンバープレートの形式が正しくありません。（例：品川 300 あ 12-34）";
 
         } else {
 
-            /* ③ 車種から定員取得 */
-            $sql = "SELECT car_model_capacity
-                    FROM car_model
-                    WHERE car_model_code = :cm";
+            /* ③ 重複チェック */
+            $sql = "SELECT COUNT(*) FROM vehicle WHERE number_plate = :num";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([":cm" => $car_model_code]);
-            $capacity = $stmt->fetchColumn();
+            $stmt->execute([":num" => $number_plate]);
+            $exists = (int)$stmt->fetchColumn();
 
-            if (!$capacity) {
-                $error = "車種情報の取得に失敗しました。";
+            if ($exists > 0) {
+                $error = "このナンバープレートの車両は既に登録されています。";
 
             } else {
 
-                /* ④ vehicle 登録 */
-                try {
-                    $sql = "INSERT INTO vehicle
-                            (number_plate, vehicle_capacity, vehicle_state, sales_office_code, car_model_code)
-                            VALUES
-                            (:num, :cap, '空車', :so, :cm)";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([
-                        ":num" => $number_plate,
-                        ":cap" => $capacity,
-                        ":so"  => $sales_office_code,
-                        ":cm"  => $car_model_code
-                    ]);
+                /* ④ 車種から定員取得 */
+                $sql = "SELECT car_model_capacity
+                        FROM car_model
+                        WHERE car_model_code = :cm";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([":cm" => $car_model_code]);
+                $capacity = $stmt->fetchColumn();
 
-                    /* 完了画面へ */
-                    header("Location: uw111_05_vehicle_add_done.php");
-                    exit;
+                if (!$capacity) {
+                    $error = "車種情報の取得に失敗しました。";
 
-                } catch (PDOException $e) {
-                    $error = "車両登録中にエラーが発生しました。";
+                } else {
+
+                    try {
+                        $sql = "INSERT INTO vehicle
+                                (number_plate, vehicle_capacity, vehicle_state, sales_office_code, car_model_code)
+                                VALUES
+                                (:num, :cap, '空車', :so, :cm)";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute([
+                            ":num" => $number_plate,
+                            ":cap" => $capacity,
+                            ":so"  => $sales_office_code,
+                            ":cm"  => $car_model_code
+                        ]);
+
+                        header("Location: uw111_05_vehicle_add_done.php");
+                        exit;
+
+                    } catch (PDOException $e) {
+                        $error = "車両登録中にエラーが発生しました。";
+                    }
                 }
             }
         }
     }
 }
+
+
 ?>
 <style>
 .container {
