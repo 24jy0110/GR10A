@@ -5,7 +5,7 @@ require_once __DIR__ . "/includes/db_connect.php";
 require_once __DIR__ . "/includes/header.php";
 
 if (!isset($_SESSION["vehicle_add"])) {
-    header("Location: uw111_04_vehicle_add.php");
+    header("Location: uw114_01_vehicle_add.php");
     exit;
 }
 
@@ -48,12 +48,12 @@ $office = $stmt->fetch(PDO::FETCH_ASSOC);
 
     </div>
 
-    <form method="post" action="uw111_05_vehicle_add_done.php">
+    <form method="post" action="uw114_03_vehicle_add_done.php">
 
         <div style="margin-top:30px;display:flex;gap:20px;">
 
             <button type="button"
-                onclick="location.href='uw111_04_vehicle_add.php'"
+                onclick="location.href='uw114_01_vehicle_add.php'"
                 style="padding:12px 30px;border:1px solid #000;background:#fff;">
                 修正する
             </button>

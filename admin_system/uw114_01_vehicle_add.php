@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         "sales_office_code" => $sales_office_code
                     ];
 
-                    header("Location: uw111_04_vehicle_confirm.php");
+                    header("Location: uw114_02_vehicle_confirm.php");
                     exit;
                 }
             }

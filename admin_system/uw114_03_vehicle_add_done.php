@@ -5,7 +5,7 @@ require_once __DIR__ . "/includes/db_connect.php";
 
 /* SESSION確認 */
 if (!isset($_SESSION["vehicle_add"])) {
-    header("Location: uw111_04_vehicle_add.php");
+    header("Location: uw114_01_vehicle_add.php");
     exit;
 }
 

@@ -263,7 +263,7 @@ if ($total_pages > 0 && $page > $total_pages) {
 <div class="container">
 
     <h2>車両ステータス一覧</h2>
-    <a class="bottom-btn" href="uw111_04_vehicle_add.php">車両を登録する</a>
+    <a class="bottom-btn" href="uw114_01_vehicle_add.php">車両を登録する</a>
 
     <form method="get" class="search-box">
         <div class="search-row">
