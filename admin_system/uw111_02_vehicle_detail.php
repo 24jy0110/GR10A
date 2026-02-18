@@ -139,6 +139,15 @@ $future_count = count($future_reservations);
         text-decoration: none;
         margin-right: 15px;
     }
+
+    .edit-btn {
+        padding: 12px 20px;
+        background: #0A84FF;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-right: 15px;
+    }
 </style>
 
 <div class="container">
@@ -181,7 +190,7 @@ $future_count = count($future_reservations);
 
                 <div class="info-row" style="margin-bottom:12px;">
 
-                <?= htmlspecialchars($res["service_start_time"]) ?>
+                    <?= htmlspecialchars($res["service_start_time"]) ?>
 
 
                     &nbsp;&nbsp;
@@ -198,11 +207,15 @@ $future_count = count($future_reservations);
         <?php endif; ?>
     </div>
 
-    <!-- 操作ボタン -->
+  
     <div>
         <a class="state-update-btn"
             href="uw111_03_vehicle_update.php?number_plate=<?= urlencode($number_plate) ?>">
             車両状態を更新する
+        </a>
+        <a class="edit-btn"
+            href="uw111_07_vehicle_edit.php?number_plate=<?= urlencode($number_plate) ?>">
+            車両情報を修正する
         </a>
 
         <a class="back-btn" href="uw111_01_vehicle_list.php">戻る</a>
