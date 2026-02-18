@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/db_connect.php';
    GET パラメータ
 --------------------------------------------------- */
 if (!isset($_GET['r'])) {
-    header("Location: uw113_01_reservation_list.php");
+    header("Location: uw117_01_reservation_list.php");
     exit;
 }
 $resNo = $_GET['r'];
@@ -187,7 +187,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; }
 
     <div class="btn-area">
 
-        <a href="uw113_01_reservation_list.php" class="btn-back">一覧に戻る</a>
+        <a href="uw117_01_reservation_list.php" class="btn-back">一覧に戻る</a>
 
         <?php if ($canChange): ?>
             <a href="uw113_03_change_vehicle.php?r=<?= $resNo ?>" class="btn-action">

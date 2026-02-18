@@ -57,7 +57,7 @@ $department_name = "配車管理課";  // 课名固定
     <a class="menu-btn" href="uw115_01_driver_list.php">ドライバー管理</a>
 
     <!-- 配車予定一覧（之后再开发） -->
-    <a class="menu-btn" href="uw113_01_reservation_list.php">配車予定一覧</a>
+    <a class="menu-btn" href="uw117_01_reservation_list.php">配車予定一覧</a>
 </div>
 
 <?php require_once __DIR__ . "/includes/footer.php"; ?>

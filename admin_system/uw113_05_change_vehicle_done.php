@@ -9,7 +9,7 @@ mb_internal_encoding("UTF-8");
    パラメータ確認
 --------------------------------------------------- */
 if (!isset($_GET['r']) || !isset($_GET['car'])) {
-    header("Location: uw113_01_reservation_list.php");
+    header("Location: uw117_01_reservation_list.php");
     exit;
 }
 
@@ -197,12 +197,12 @@ mb_send_mail($to, $subject, $body, $headers);
             配車の変更が正常に完了しました。
         </div>
 
-        <a href="uw113_02_reservation_detail.php?r=<?= urlencode($resNo) ?>"
+        <a href="uw117_02_reservation_detail.php?r=<?= urlencode($resNo) ?>"
             class="btn btn-detail">
             予約詳細へ戻る
         </a>
 
-        <a href="uw113_01_reservation_list.php"
+        <a href="uw117_01_reservation_list.php"
             class="btn btn-list">
             配車一覧へ戻る
         </a>

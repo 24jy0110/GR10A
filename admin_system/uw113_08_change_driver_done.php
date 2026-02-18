@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/db_connect.php';
    GET チェック
 --------------------------------------------------- */
 if (!isset($_GET['r']) || !isset($_GET['driver'])) {
-    header("Location: uw113_01_reservation_list.php");
+    header("Location: uw117_01_reservation_list.php");
     exit;
 }
 
@@ -118,10 +118,10 @@ table.done-table {
     </table>
 
     <div class="btn-area">
-        <a href="uw113_02_reservation_detail.php?r=<?= urlencode($resNo) ?>" 
+        <a href="uw117_02_reservation_detail.php?r=<?= urlencode($resNo) ?>" 
            class="btn btn-detail">予約詳細に戻る</a>
 
-        <a href="uw113_01_reservation_list.php"
+        <a href="uw117_01_reservation_list.php"
            class="btn btn-back">配車一覧に戻る</a>
     </div>
 

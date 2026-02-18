@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/db_connect.php';
    GET reservation number
 --------------------------------------------------- */
 if (!isset($_GET['r'])) {
-    header("Location: uw113_01_reservation_list.php");
+    header("Location: uw117_01_reservation_list.php");
     exit;
 }
 
@@ -223,7 +223,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#f5f5f5; }
         </div>
     <?php endif; ?>
 
-    <a href="uw113_02_reservation_detail.php?r=<?= $resNo ?>" class="btn-back">戻る</a>
+    <a href="uw117_02_reservation_detail.php?r=<?= $resNo ?>" class="btn-back">戻る</a>
 
 </div>
 

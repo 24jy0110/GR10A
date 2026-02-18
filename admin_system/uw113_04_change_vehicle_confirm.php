@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/db_connect.php';
    GET パラメータ確認
 --------------------------------------------------- */
 if (!isset($_GET['r']) || !isset($_GET['car'])) {
-    header("Location: uw113_01_reservation_list.php");
+    header("Location: uw117_01_reservation_list.php");
     exit;
 }
 

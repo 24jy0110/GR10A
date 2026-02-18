@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/db_connect.php';
    GET: reservation number
 --------------------------------------------------- */
 if (!isset($_GET['r'])) {
-    header("Location: uw113_01_reservation_list.php");
+    header("Location: uw117_01_reservation_list.php");
     exit;
 }
 $resNo = $_GET['r'];
@@ -199,7 +199,7 @@ $vehicles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
         </table>
 
-        <a href="uw113_02_reservation_detail.php?r=<?= $resNo ?>" class="btn-back">戻る</a>
+        <a href="uw117_02_reservation_detail.php?r=<?= $resNo ?>" class="btn-back">戻る</a>
 
     </div>
 
