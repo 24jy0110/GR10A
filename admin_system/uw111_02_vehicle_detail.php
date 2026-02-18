@@ -214,7 +214,7 @@ $future_count = count($future_reservations);
             車両状態を更新する
         </a>
         <a class="edit-btn"
-            href="uw111_07_vehicle_edit.php?number_plate=<?= urlencode($number_plate) ?>">
+            href="uw1110_01_vehicle_edit.php?number_plate=<?= urlencode($number_plate) ?>">
             車両情報を修正する
         </a>
 
