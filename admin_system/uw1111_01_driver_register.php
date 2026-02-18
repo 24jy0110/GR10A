@@ -80,7 +80,7 @@ function checkLimit() {
 
 <h1>新規ドライバー登録</h1>
 
-<form action="uw112_07_driver_register_confirm.php" method="post" onsubmit="return checkLimit();">
+<form action="uw1111_02_driver_register_confirm.php" method="post" onsubmit="return checkLimit();">
 
     <div class="label">社員ID*：</div>
     <?= htmlspecialchars($employee_id) ?>

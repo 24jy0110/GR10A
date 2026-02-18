@@ -112,7 +112,7 @@ h1 {
     <div>メールアドレス：<?= htmlspecialchars($driver_email) ?></div>
 </div>
 
-<form action="uw112_08_driver_register_done.php" method="post">
+<form action="uw1111_03_driver_register_done.php" method="post">
 
     <input type="hidden" name="employee_id" value="<?= $employee_id ?>">
     <input type="hidden" name="driver_name" value="<?= htmlspecialchars($driver_name) ?>">
@@ -127,7 +127,7 @@ h1 {
 
     <div class="button-area">
         <button type="submit" class="btn-blue">登録する</button>
-        <a href="uw112_06_driver_register.php" class="btn-white">戻る</a>
+        <a href="uw1111_01_driver_register.php" class="btn-white">戻る</a>
     </div>
 </form>
 

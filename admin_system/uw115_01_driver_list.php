@@ -146,14 +146,12 @@ input[type=text], select {
 
 <h1>ドライバー管理（配車センター）</h1>
 
-<!-- ★★ ここから追加：ボタン2つ ★★ -->
+
 <div style="margin-bottom: 20px;">
     <a href="uw110.php" class="btn">戻る（配車センターへ）</a>
-    <a href="uw112_06_driver_register.php" class="btn" style="margin-left: 15px;">新規ドライバー登録</a>
+    <a href="uw1111_01_driver_register.php" class="btn" style="margin-left: 15px;">新規ドライバー登録</a>
 </div>
-<!-- ★★ ここまで追加 ★★ -->
 
-<!-- 検索フォーム -->
 <form method="get" class="search-box">
     <label>営業所：</label>
     <select name="office">
