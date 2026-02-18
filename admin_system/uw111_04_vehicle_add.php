@@ -33,13 +33,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($number_plate === '' || $car_model_code === '' || $sales_office_code === '') {
         $error = "未入力の項目があります。";
     } else {
+        /* ② 日本ナンバー形式チェック（无空格版） */
 
-        /* ② 车牌格式校验（日本样式） */
-        $pattern = '/^[^\s]{2,}\s\d{3}\s[あいうえお]\s\d{2}-\d{2}$/u';
+        $pattern = '/^[一-龯]{2,}\d{3}[あ-お]\d{2}-\d{2}$/u';
 
         if (!preg_match($pattern, $number_plate)) {
-            $error = "ナンバープレートの形式が正しくありません。（例：品川 300 あ 12-34）";
+
+            $error = "ナンバープレート形式が正しくありません。
+            例：品川500あ90-12
+            ※空白なし・半角数字・半角ハイフン使用";
         } else {
+
 
             /* ③ 重複チェック */
             $sql = "SELECT COUNT(*) FROM vehicle WHERE number_plate = :num";
@@ -164,7 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <!-- 車両番号 -->
             <div class="form-block">
                 <label>ナンバープレート（半角英数字と半角）</label>
-                <input type="text" name="number_plate" placeholder="※ 例：品川 300 あ 12-34（半角スペース・数字・- 使用）">
+                <input type="text" name="number_plate" placeholder="※ 例：品川300あ12-34（半角数字・- 使用）">
             </div>
 
             <!-- 車種 -->
