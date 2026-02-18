@@ -200,6 +200,7 @@ select:disabled {
 <label>ナンバープレート</label>
 <input type="text"
        name="number_plate"
+       placeholder="例：品川500あ12-34"
        value="<?= htmlspecialchars($vehicle["number_plate"]) ?>"
        <?= ($is_running || $has_future) ? "disabled" : "" ?>>
 
