@@ -187,7 +187,7 @@ $vehicles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td>
                             <a class="btn-select"
-                                href="uw113_04_change_vehicle_confirm.php?r=<?= $resNo ?>&car=<?= urlencode($v["number_plate"]) ?>">
+                                href="uw118_02_change_vehicle_confirm.php?r=<?= $resNo ?>&car=<?= urlencode($v["number_plate"]) ?>">
                                 選択
                             </a>
                         </td>

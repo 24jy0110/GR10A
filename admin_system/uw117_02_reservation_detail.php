@@ -190,7 +190,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; }
         <a href="uw117_01_reservation_list.php" class="btn-back">一覧に戻る</a>
 
         <?php if ($canChange): ?>
-            <a href="uw113_03_change_vehicle.php?r=<?= $resNo ?>" class="btn-action">
+            <a href="uw118_01_change_vehicle.php?r=<?= $resNo ?>" class="btn-action">
                 配車を変更する
             </a>
             <a href="uw119_01_change_driver.php?r=<?= $resNo ?>" class="btn-action">

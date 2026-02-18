@@ -126,10 +126,10 @@ table.confirm-table {
     </table>
 
     <div class="btn-area">
-        <a href="uw113_05_change_vehicle_done.php?r=<?= urlencode($resNo) ?>&car=<?= urlencode($newVehicle["number_plate"]) ?>" 
+        <a href="uw118_03_change_vehicle_done.php?r=<?= urlencode($resNo) ?>&car=<?= urlencode($newVehicle["number_plate"]) ?>" 
            class="btn btn-ok">確定する</a>
 
-        <a href="uw113_03_change_vehicle.php?r=<?= urlencode($resNo) ?>" 
+        <a href="uw118_01_change_vehicle.php?r=<?= urlencode($resNo) ?>" 
            class="btn btn-back">戻る</a>
     </div>
 
