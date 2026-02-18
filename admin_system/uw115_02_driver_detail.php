@@ -123,7 +123,7 @@ h1 {
 </div>
 
 <!-- 操作ボタン -->
-<a class="btn-blue" href="uw112_03_driver_edit.php?employee_id=<?= $driver['employee_id'] ?>">編集する</a>
+<a class="btn-blue" href="uw116_01_driver_edit.php?employee_id=<?= $driver['employee_id'] ?>">編集する</a>
 <a class="btn" href="uw115_01_driver_list.php">戻る</a>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

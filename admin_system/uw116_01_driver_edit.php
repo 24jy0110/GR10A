@@ -157,7 +157,7 @@ function checkLimit() {
 
 <h1>ドライバー情報編集：<?= htmlspecialchars($driver['employee_id']) ?></h1>
 
-<form action="uw112_04_driver_edit_confirm.php" method="post" onsubmit="return checkLimit();">
+<form action="uw116_02_driver_edit_confirm.php" method="post" onsubmit="return checkLimit();">
 
 <div class="form-box">
 
