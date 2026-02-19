@@ -86,7 +86,7 @@ try {
     /* ---------------------------------------------------
         完了後画面へ
     --------------------------------------------------- */
-    header("Location: uw12102_finish_task_done.php?r=" . urlencode($resNo));
+    header("Location: uw121_02_finish_task_done.php?r=" . urlencode($resNo));
     exit;
 
 } catch (Exception $e) {
