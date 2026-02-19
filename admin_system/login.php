@@ -17,9 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         // DBから employee を取得
-        $sql = "SELECT employee_id, employee_name, sales_office_code, password
-                FROM employee 
-                WHERE employee_id = :id";
+        $sql = "
+SELECT 
+    e.employee_id,
+    e.employee_name,
+    e.sales_office_code,
+    e.password,
+    so.sales_office_name
+FROM employee e
+LEFT JOIN sales_office so 
+    ON e.sales_office_code = so.sales_office_code
+WHERE e.employee_id = :id
+";
 
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':id', $employee_id, PDO::PARAM_STR);
@@ -46,16 +55,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'employee_id'       => $emp['employee_id'],
                 'employee_name'     => $emp['employee_name'],
                 'sales_office_code' => $emp['sales_office_code'],
+                'sales_office_name' => $emp['sales_office_name'], 
                 'job_code'          => $job_code
             ];
+
 
             /* ------------------------------
                職種別TOPへ遷移
             ------------------------------ */
             switch ($job_code) {
-                case '01': header("Location: uw100.php"); break; // 受付
-                case '02': header("Location: uw110.php"); break; // 配車
-                case '03': header("Location: uw120.php"); break; // ドライバー
+                case '01':
+                    header("Location: uw100.php");
+                    break; // 受付
+                case '02':
+                    header("Location: uw110.php");
+                    break; // 配車
+                case '03':
+                    header("Location: uw120.php");
+                    break; // ドライバー
                 default:
                     $error = "不正な職種コードです。";
                     break;
@@ -69,77 +86,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<title>ログイン | 丸和交通</title>
+    <meta charset="UTF-8">
+    <title>ログイン | 丸和交通</title>
 
-<style>
-body {
-    font-family:'Noto Sans JP', sans-serif;
-    background:#f5f5f5;
-    margin:0;
-    padding:0;
-}
-.login-container {
-    width:380px;
-    margin:120px auto;
-    padding:40px 30px;
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:10px;
-    text-align:center;
-}
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
 
-.login-container h2 {
-    font-size:24px;
-    font-weight:700;
-    margin-bottom:30px;
-}
+        .login-container {
+            width: 380px;
+            margin: 120px auto;
+            padding: 40px 30px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+        }
 
-.login-container input {
-    width:90%;
-    padding:12px;
-    border:1px solid #bbb;
-    border-radius:5px;
-    margin-bottom:15px;
-    font-size:15px;
-}
+        .login-container h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
 
-.login-container button {
-    width:95%;
-    padding:14px;
-    background:#000;
-    color:#fff;
-    border:none;
-    border-radius:6px;
-    font-size:17px;
-    cursor:pointer;
-    font-weight:600;
-}
+        .login-container input {
+            width: 90%;
+            padding: 12px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
 
-.error {
-    color:#d60000;
-    font-size:14px;
-    margin-bottom:15px;
-}
-</style>
+        .login-container button {
+            width: 95%;
+            padding: 14px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .error {
+            color: #d60000;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="login-container">
-    <h2>社員ログイン</h2>
+    <div class="login-container">
+        <h2>社員ログイン</h2>
 
-    <?php if ($error): ?>
-        <p class="error"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+        <?php if ($error): ?>
+            <p class="error"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
-    <form method="post">
-        <input type="text" name="employee_id" placeholder="社員ID" required>
-        <input type="password" name="password" placeholder="パスワード" required>
-        <button type="submit">ログイン</button>
-    </form>
-</div>
+        <form method="post">
+            <input type="text" name="employee_id" placeholder="社員ID" required>
+            <input type="password" name="password" placeholder="パスワード" required>
+            <button type="submit">ログイン</button>
+        </form>
+    </div>
 
 </body>
+
 </html>

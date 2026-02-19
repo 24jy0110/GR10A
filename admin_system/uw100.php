@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/check_login.php'; // ← ログイン必須
+require_once __DIR__ . "/includes/db_connect.php";
 $employee = $_SESSION['employee'];
 
 $employee_name = $employee['employee_name'];
@@ -7,14 +8,16 @@ $sales_office  = $employee['sales_office_code']; // 例：OFC001 → 要変換
 $job_code      = $employee['job_code'];
 
 // 支社コード → 名称（必要なら DB から動的取得も可）
-$sales_office_name = [
-    "OFC001" => "亀沢本社",
-    "OFC002" => "豊島支社",
-    "OFC003" => "桃井支社",
-    "OFC004" => "富士見町支社",
-    "OFC005" => "本羽田支社",
-    "OFC006" => "中区支社"
-][$sales_office] ?? $sales_office;
+$stmt = $pdo->prepare("
+    SELECT sales_office_name
+    FROM sales_office
+    WHERE sales_office_code = :code
+");
+$stmt->bindValue(':code', $sales_office);
+$stmt->execute();
+$office = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$sales_office_name = $office['sales_office_name'] ?? '';
 
 $job_name = [
     "01" => "カスタマーサービス課",
