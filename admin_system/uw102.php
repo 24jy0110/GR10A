@@ -67,15 +67,14 @@ if (!$res) {
 --------------------------------------------------- */
 $rideDate = date("Y/m/d H:i", strtotime($res["service_start_time"]));
 
-$start = new DateTime($res["service_start_time"]);
-$end   = new DateTime($res["service_end_date"]);
-$days  = $start->diff($end)->days;
-if ($start->diff($end)->days == 0) {
-    $days = 1;
-} else {
-    $days = $start->diff($end)->days + 2;
-}
+$start = new DateTime(date("Y-m-d", strtotime($res["service_start_time"])));
+$end   = new DateTime(date("Y-m-d", strtotime($res["service_end_date"])));
 
+// 日付のみの差（時間無視）
+$diffDays = (int)$start->diff($end)->days;
+
+// 利用日数 = 差分 + 1
+$days = $diffDays + 1;
 /* ドライバー情報 */
 $driverName  = $res["driver_name"] ?: "未定";
 $driverEmail = $res["driver_email"] ?: "未定";
