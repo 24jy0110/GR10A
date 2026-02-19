@@ -165,9 +165,10 @@ h1 {
     <?php endforeach; ?>
 
     <button type="submit" class="btn-blue">更新する</button>
+    <a class="btn" href="uw116_01_driver_edit.php?employee_id=<?= $employee_id ?>">戻る</a>
 </form>
 
-<a class="btn" href="uw116_01_driver_edit.php?employee_id=<?= $employee_id ?>">戻る</a>
+
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 

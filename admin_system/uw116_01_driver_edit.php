@@ -242,7 +242,7 @@ function checkOfficeChange() {
     </div>
 
     <div>
-        <span class="label">対応言語：</span>
+        <span class="label">対応言語：（最大3つまで）</span>
     </div>
 
     <div class="lang-box">
