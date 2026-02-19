@@ -42,7 +42,7 @@ if (!$vehicle) {
    ※ 包天ロジック：reservation_date > 今日 で取得
 ------------------------------------------ */
 $sql = "
-    SELECT 
+SELECT 
     reservation_number,
     reservation_date,
     service_start_time,
@@ -51,8 +51,10 @@ $sql = "
 FROM reservation
 WHERE number_plate = :num
   AND service_start_time > NOW()
+  AND state_code IN ('STC02', 'STC04') 
 ORDER BY service_start_time ASC
 ";
+
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(":num", $number_plate);
 $stmt->execute();
