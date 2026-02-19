@@ -153,7 +153,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; }
 <script>
 function finishTask(no) {
     if (confirm("この行程を完了として登録しますか？")) {
-        location.href = "uw121_02_finish_task.php?r=" + no;
+        location.href = "uw123_01_finish_task.php?r=" + no;
     }
 }
 </script>
