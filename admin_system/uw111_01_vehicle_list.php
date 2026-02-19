@@ -6,11 +6,11 @@ require_once __DIR__ . "/includes/header.php";
 /* ------------------------------
    搜索条件取得（GET方式）
 ------------------------------ */
-$sales_office_code = $_GET['sales_office_code'] ?? '';
+
 $vehicle_state = $_GET['vehicle_state'] ?? '';
 $car_model_code = $_GET['car_model_code'] ?? '';
 $keyword = $_GET['keyword'] ?? '';
-
+$login_office = $_SESSION['employee']['sales_office_code'];
 /* ------------------------------
    分页设置（1 页 20 件）
 ------------------------------ */
@@ -50,15 +50,13 @@ $sql = "
     FROM vehicle v
     JOIN sales_office so ON v.sales_office_code = so.sales_office_code
     JOIN car_model cm ON v.car_model_code = cm.car_model_code
-    WHERE 1 = 1
+    WHERE v.sales_office_code = :login_office
+
 ";
 
 $params = [];
 
-if ($sales_office_code !== '') {
-    $sql .= " AND v.sales_office_code = :sales_office_code";
-    $params[':sales_office_code'] = $sales_office_code;
-}
+
 if ($vehicle_state !== '') {
     $sql .= " AND v.vehicle_state = :vehicle_state";
     $params[':vehicle_state'] = $vehicle_state;
@@ -73,7 +71,7 @@ if ($keyword !== '') {
 }
 
 $sql .= " ORDER BY v.number_plate LIMIT :per_page OFFSET :offset";
-
+$params[":login_office"] = $login_office;
 $stmt = $pdo->prepare($sql);
 
 foreach ($params as $k => $v) {
@@ -91,14 +89,14 @@ $vehicles = $stmt->fetchAll();
 $sql_count = "
     SELECT COUNT(*) AS cnt
     FROM vehicle v
-    WHERE 1 = 1
+    WHERE v.sales_office_code = :login_office
 ";
-$params_count = [];
+$params_count = [
+    ":login_office" => $login_office
+];
 
-if ($sales_office_code !== '') {
-    $sql_count .= " AND v.sales_office_code = :sales_office_code";
-    $params_count[':sales_office_code'] = $sales_office_code;
-}
+
+
 if ($vehicle_state !== '') {
     $sql_count .= " AND v.vehicle_state = :vehicle_state";
     $params_count[':vehicle_state'] = $vehicle_state;
@@ -268,18 +266,7 @@ if ($total_pages > 0 && $page > $total_pages) {
     <form method="get" class="search-box">
         <div class="search-row">
 
-            <div class="search-item">
-                <label>営業所：</label>
-                <select name="sales_office_code">
-                    <option value="">指定なし</option>
-                    <?php foreach ($sales_offices as $so): ?>
-                        <option value="<?= $so['sales_office_code'] ?>"
-                            <?= ($sales_office_code === $so['sales_office_code']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($so['sales_office_name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+           
 
 
             <div class="search-item">
@@ -408,10 +395,10 @@ if ($total_pages > 0 && $page > $total_pages) {
 function buildPageUrl($page)
 {
     return '?page=' . $page
-        . '&sales_office_code=' . urlencode($_GET['sales_office_code'] ?? '')
-        . '&vehicle_state=' . urlencode($_GET['vehicle_state'] ?? '')
-        . '&car_model_code=' . urlencode($_GET['car_model_code'] ?? '')
-        . '&keyword=' . urlencode($_GET['keyword'] ?? '');
+    . '&vehicle_state=' . urlencode($_GET['vehicle_state'] ?? '')
+    . '&car_model_code=' . urlencode($_GET['car_model_code'] ?? '')
+    . '&keyword=' . urlencode($_GET['keyword'] ?? '');
+
 }
 ?>
 
