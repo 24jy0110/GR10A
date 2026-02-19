@@ -7,9 +7,7 @@ $driver = $_SESSION["employee"];
 $driver_id = $driver["employee_id"];
 
 /* ============================================================
-   取得：该司机的所有「已接订单」
-   STC02 → 予約確定（未来行程）
-   STC04 → 運行中（当前行程）
+   取得：该司机的所有订单
 ============================================================ */
 $sql = "
 SELECT 
@@ -19,50 +17,49 @@ SELECT
     ride_location,
     customer_name,
     ride_count,
-    car_model_code
+    state_code
 FROM reservation
 WHERE driver_id = :id
-  AND state_code IN ('STC02', 'STC04')
-ORDER BY service_start_time ASC
+ORDER BY service_start_time DESC
 ";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([":id" => $driver_id]);
 $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
 /* ============================================================
-   分类：当前行程 / 最近的未来行程 / 其他未来行程
+   分类
 ============================================================ */
 $current_task = null;
-$next_task = null;
 $future_tasks = [];
+$history_tasks = [];
 
 $now = time();
 
 foreach ($jobs as $j) {
 
     $start = strtotime($j["service_start_time"]);
-    $end = strtotime($j["service_end_date"] . " 23:59:59");
+    $end   = strtotime($j["service_end_date"] . " 23:59:59");
 
-
-    /* ---- case 1: 已经在运行中的订单（STC04） ---- */
-    if ($start <= $now && $now <= $end) {
+    /* 当前行程 */
+    if ($j["state_code"] === "STC04") {
         $current_task = $j;
         continue;
     }
 
-    /* ---- case 2: 还未开始的未来订单（STC02） ---- */
-    if ($start > $now) {
+    /* 未来行程 */
+    if ($j["state_code"] === "STC02") {
         $future_tasks[] = $j;
+        continue;
+    }
+
+    /* 历史 */
+    if (in_array($j["state_code"], ["STC05","STC03"])) {
+        $history_tasks[] = $j;
+        continue;
     }
 }
-
-/* ---- 找出最近的未来订单作为 “次の行程” ---- */
-if (!$current_task && !empty($future_tasks)) {
-    $next_task = $future_tasks[0];       // 最早的未来订单
-    array_shift($future_tasks);          // 剩下的继续显示在下方
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -74,41 +71,64 @@ if (!$current_task && !empty($future_tasks)) {
 body {
     font-family:'Noto Sans JP',sans-serif;
     margin:40px;
+    background:#fafafa;
 }
 
-h1 {
-    font-size:26px;
-    margin-bottom:25px;
-}
+h1 { font-size:28px; margin-bottom:30px; }
 
-/* 卡片样式 */
-.task-card {
-    border:2px solid #000;
-    padding:18px;
-    border-radius:6px;
-    margin-bottom:20px;
-}
-
-.task-title {
+.section-title {
     font-size:20px;
     font-weight:bold;
-    margin-bottom:10px;
+    margin:35px 0 15px;
 }
 
+.task-card {
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:18px;
+    margin-bottom:15px;
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+
+.task-card b { display:inline-block; width:100px; }
+
 .detail-btn {
+    margin-top:10px;
+    display:inline-block;
     padding:8px 16px;
     background:#0A84FF;
     color:#fff;
-    text-decoration:none;
     border-radius:4px;
-    display:inline-block;
-    margin-top:10px;
+    text-decoration:none;
 }
-.detail-btn:hover {
-    background:#0066cc;
+
+.detail-btn:hover { background:#0066cc; }
+
+.badge {
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:12px;
+    font-size:12px;
+    color:#fff;
+    margin-left:5px;
+}
+
+.badge-STC02 { background:#2196f3; }
+.badge-STC04 { background:#00bcd4; }
+.badge-STC05 { background:#4caf50; }
+.badge-STC03 { background:#9e9e9e; }
+
+.menu-btn {
+    display:inline-block;
+    padding:12px 28px;
+    background:#000;
+    color:#fff;
+    text-decoration:none;
+    border-radius:6px;
+    margin-top:40px;
 }
 </style>
-
 </head>
 <body>
 
@@ -117,61 +137,42 @@ h1 {
 <h1>乗務確認</h1>
 
 <!-- ============================================================
-     ① 当前行程（運行中）
+     当前行程
 ============================================================ -->
 <?php if ($current_task): ?>
-<div class="task-card">
-    <div class="task-title">【現在の行程】</div>
+<div class="section-title">現在の行程</div>
 
+<div class="task-card">
     <b>予約番号：</b><?= htmlspecialchars($current_task["reservation_number"]) ?><br>
     <b>乗車日時：</b><?= htmlspecialchars($current_task["service_start_time"]) ?><br>
     <b>降車日：</b><?= htmlspecialchars($current_task["service_end_date"]) ?><br>
     <b>乗車場所：</b><?= nl2br(htmlspecialchars($current_task["ride_location"])) ?><br>
-    <b>乗車人数：</b><?= htmlspecialchars($current_task["ride_count"]) ?> 名<br>
+    <b>人数：</b><?= htmlspecialchars($current_task["ride_count"]) ?> 名<br>
+
+    <span class="badge badge-STC04">運行中</span><br>
 
     <a class="detail-btn"
        href="uw12101_driver_task_detail.php?r=<?= urlencode($current_task["reservation_number"]) ?>">
         詳細を見る
     </a>
 </div>
-
 <?php endif; ?>
 
 
 <!-- ============================================================
-     ② 次の行程（未来订单 1 条）
-============================================================ -->
-<?php if (!$current_task && $next_task): ?>
-<div class="task-card">
-    <div class="task-title">【次の行程】</div>
-
-    <b>予約番号：</b><?= htmlspecialchars($next_task["reservation_number"]) ?><br>
-    <b>乗車日時：</b><?= htmlspecialchars($next_task["service_start_time"]) ?><br>
-    <b>降車日：</b><?= htmlspecialchars($next_task["service_end_date"]) ?><br>
-    <b>乗車場所：</b><?= nl2br(htmlspecialchars($next_task["ride_location"])) ?><br>
-    <b>乗車人数：</b><?= htmlspecialchars($next_task["ride_count"]) ?> 名<br>
-
-    <a class="detail-btn"
-       href="uw12101_driver_task_detail.php?r=<?= urlencode($next_task["reservation_number"]) ?>">
-        詳細を見る
-    </a>
-</div>
-<?php endif; ?>
-
-
-<!-- ============================================================
-     ③ 未来行程（次の行程以外全て）
+     未来行程
 ============================================================ -->
 <?php if (!empty($future_tasks)): ?>
-<h2 style="margin-top:40px;">今後の行程</h2>
+<div class="section-title">今後の行程</div>
 
 <?php foreach ($future_tasks as $f): ?>
 <div class="task-card">
     <b>予約番号：</b><?= htmlspecialchars($f["reservation_number"]) ?><br>
     <b>乗車日時：</b><?= htmlspecialchars($f["service_start_time"]) ?><br>
     <b>降車日：</b><?= htmlspecialchars($f["service_end_date"]) ?><br>
-    <b>乗車場所：</b><?= nl2br(htmlspecialchars($f["ride_location"])) ?><br>
-    <b>乗車人数：</b><?= htmlspecialchars($f["ride_count"]) ?> 名<br>
+    <b>人数：</b><?= htmlspecialchars($f["ride_count"]) ?> 名<br>
+
+    <span class="badge badge-STC02">予約確定</span><br>
 
     <a class="detail-btn"
        href="uw12101_driver_task_detail.php?r=<?= urlencode($f["reservation_number"]) ?>">
@@ -179,30 +180,46 @@ h1 {
     </a>
 </div>
 <?php endforeach; ?>
-
 <?php endif; ?>
 
 
 <!-- ============================================================
-     ④ 行程为空
+     历史行程
 ============================================================ -->
-<?php if (!$current_task && !$next_task && empty($future_tasks)): ?>
-<p>現在、担当している行程はありません。</p>
-<p>今後の行程もありません。</p>
-<?php endif; ?>
-<div style="text-align:center; margin-top:35px;">
-    <a href="uw120.php"
-       style="
-           display:inline-block;
-           padding:12px 28px;
-           background:#000;
-           color:#fff;
-           text-decoration:none;
-           border-radius:6px;
-           font-size:16px;
-       ">
-        メニューへ戻る
+<?php if (!empty($history_tasks)): ?>
+<div class="section-title">過去の行程</div>
+
+<?php foreach ($history_tasks as $h): ?>
+<div class="task-card">
+    <b>予約番号：</b><?= htmlspecialchars($h["reservation_number"]) ?><br>
+    <b>乗車日時：</b><?= htmlspecialchars($h["service_start_time"]) ?><br>
+    <b>降車日：</b><?= htmlspecialchars($h["service_end_date"]) ?><br>
+
+    <?php if ($h["state_code"] === "STC05"): ?>
+        <span class="badge badge-STC05">完了</span>
+    <?php else: ?>
+        <span class="badge badge-STC03">キャンセル</span>
+    <?php endif; ?>
+
+    <br>
+
+    <a class="detail-btn"
+       href="uw12101_driver_task_detail.php?r=<?= urlencode($h["reservation_number"]) ?>">
+        詳細を見る
     </a>
 </div>
+<?php endforeach; ?>
+<?php endif; ?>
+
+
+<?php if (!$current_task && empty($future_tasks) && empty($history_tasks)): ?>
+<p>現在、担当している行程はありません。</p>
+<?php endif; ?>
+
+
+<div style="text-align:center;">
+    <a href="uw120.php" class="menu-btn">メニューへ戻る</a>
+</div>
+
 </body>
 </html>
