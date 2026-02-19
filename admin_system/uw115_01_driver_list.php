@@ -3,22 +3,20 @@ session_start();
 require_once __DIR__ . '/includes/db_connect.php';
 require_once __DIR__ . '/includes/check_login.php';
 
-// -----------------------
-// 検索条件受け取り
-// -----------------------
-$office = $_GET['office'] ?? '';
+/* ---------------------------------------------------------
+   現在ログインしている営業所（配車センター）
+--------------------------------------------------------- */
+$login_office = $_SESSION['employee']['sales_office_code'];
+
+/* ---------------------------------------------------------
+   検索条件
+--------------------------------------------------------- */
 $lang = $_GET['lang'] ?? '';
 $keyword = $_GET['keyword'] ?? '';
 
-// -----------------------
-// 営業所リスト取得
-// -----------------------
-$sql_office = "SELECT sales_office_code, sales_office_name FROM sales_office ORDER BY sales_office_code";
-$office_list = $pdo->query($sql_office)->fetchAll();
-
-// -----------------------
-// 検索用 SQL 生成
-// -----------------------
+/* ---------------------------------------------------------
+   SQL 基本部（ログイン営業所のみ）
+--------------------------------------------------------- */
 $sql = "
 SELECT 
     e.employee_id,
@@ -35,64 +33,69 @@ JOIN sales_office so ON e.sales_office_code = so.sales_office_code
 LEFT JOIN language_category lc1 ON d.language_id_1 = lc1.language_category_id
 LEFT JOIN language_category lc2 ON d.language_id_2 = lc2.language_category_id
 LEFT JOIN language_category lc3 ON d.language_id_3 = lc3.language_category_id
-WHERE 1 = 1
+WHERE e.sales_office_code = :login_office
 ";
 
-// 営業所
-if ($office !== '') {
-    $sql .= " AND e.sales_office_code = :office ";
-}
-// 言語条件（どれか1つでも一致すれば OK）
-if ($lang !== '') {
+/* ---------------------------------------------------------
+   言語フィルタ（LCAT00=日本語 の場合は条件なし）
+--------------------------------------------------------- */
+if ($lang !== '' && $lang !== 'LCAT00') {
     $sql .= " AND (:lang IN (d.language_id_1, d.language_id_2, d.language_id_3)) ";
 }
-// キーワード検索
+
+/* ---------------------------------------------------------
+   キーワード検索（氏名 / カナ / 社員ID）
+--------------------------------------------------------- */
 if ($keyword !== '') {
     $sql .= " AND (
-        e.employee_name LIKE :kw OR 
-        e.employee_name_kana LIKE :kw OR
-        e.employee_id LIKE :kw
-    ) ";
+            e.employee_name LIKE :kw OR
+            e.employee_name_kana LIKE :kw OR
+            e.employee_id LIKE :kw
+        ) ";
 }
 
 $sql .= " ORDER BY e.employee_id ASC";
 
+/* ---------------------------------------------------------
+   SQL 実行
+--------------------------------------------------------- */
 $stmt = $pdo->prepare($sql);
+$stmt->bindValue(':login_office', $login_office, PDO::PARAM_STR);
 
-if ($office !== '') $stmt->bindValue(':office', $office, PDO::PARAM_STR);
-if ($lang !== '') $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
-if ($keyword !== '') $stmt->bindValue(':kw', "%{$keyword}%", PDO::PARAM_STR);
+if ($lang !== '' && $lang !== 'LCAT00') {
+    $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
+}
+if ($keyword !== '') {
+    $stmt->bindValue(':kw', "%{$keyword}%", PDO::PARAM_STR);
+}
 
 $stmt->execute();
 $drivers = $stmt->fetchAll();
+
+/* ---------------------------------------------------------
+   言語リスト取得
+--------------------------------------------------------- */
+$lang_list = $pdo->query("SELECT * FROM language_category ORDER BY language_category_id")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <title>ドライバー管理（配車センター）</title>
+
 <style>
-body {
-    font-family: "Noto Sans JP", sans-serif;
-    margin: 40px 60px;
-}
-h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
+body { font-family: "Noto Sans JP", sans-serif; margin: 40px 60px; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
 .search-box {
     padding: 15px;
     border: 2px solid #000;
     width: 80%;
     margin-bottom: 25px;
+    border-radius: 6px;
 }
-label {
-    font-weight: 700;
-    margin-right: 10px;
-}
+label { font-weight: 700; margin-right: 10px; }
 input[type=text], select {
-    padding: 6px 10px;
+    padding: 6px 12px;
     font-size: 16px;
     margin-right: 20px;
 }
@@ -106,10 +109,8 @@ input[type=text], select {
     border-radius: 6px;
     text-decoration: none;
 }
-.btn:hover {
-    background: #000;
-    color: #fff;
-}
+.btn:hover { background: #000; color: #fff; }
+
 .table-list {
     width: 100%;
     border-collapse: collapse;
@@ -125,7 +126,6 @@ input[type=text], select {
     font-weight: 700;
 }
 .btn-detail {
-    display: inline-block;
     padding: 6px 16px;
     background: #1e90ff;
     color: #fff;
@@ -135,9 +135,6 @@ input[type=text], select {
 .btn-detail:hover {
     background: #0a70d0;
 }
-.btn-add {
-    margin-top: 25px;
-}
 </style>
 </head>
 <body>
@@ -146,31 +143,18 @@ input[type=text], select {
 
 <h1>ドライバー管理（配車センター）</h1>
 
-
 <div style="margin-bottom: 20px;">
     <a href="uw110.php" class="btn">戻る（配車センターへ）</a>
     <a href="uw1111_01_driver_register.php" class="btn" style="margin-left: 15px;">新規ドライバー登録</a>
 </div>
 
+<!-- 検索フォーム -->
 <form method="get" class="search-box">
-    <label>営業所：</label>
-    <select name="office">
-        <option value="">すべて</option>
-        <?php foreach ($office_list as $o): ?>
-            <option value="<?= $o['sales_office_code'] ?>"
-                <?= ($office === $o['sales_office_code']) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($o['sales_office_name']) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
 
     <label>対応言語：</label>
     <select name="lang">
         <option value="">すべて</option>
-        <?php
-        $langs = $pdo->query("SELECT * FROM language_category ORDER BY language_category_id")->fetchAll();
-        foreach ($langs as $l):
-        ?>
+        <?php foreach ($lang_list as $l): ?>
             <option value="<?= $l['language_category_id'] ?>"
                 <?= ($lang === $l['language_category_id']) ? 'selected' : '' ?>>
                 <?= htmlspecialchars($l['language_category_name']) ?>
@@ -184,6 +168,7 @@ input[type=text], select {
     <button type="submit" class="btn">検索</button>
 </form>
 
+
 <!-- 一覧テーブル -->
 <table class="table-list">
 <tr>
@@ -194,22 +179,25 @@ input[type=text], select {
     <th>操作</th>
 </tr>
 
-<?php foreach ($drivers as $d): ?>
+<?php if (count($drivers) > 0): ?>
+    <?php foreach ($drivers as $d): ?>
+    <tr>
+        <td><?= htmlspecialchars($d['employee_id']) ?></td>
+        <td><?= htmlspecialchars($d['employee_name']) ?></td>
+        <td><?= htmlspecialchars($d['sales_office_name']) ?></td>
+        <td><?= implode(' / ', array_filter([$d['lang1'], $d['lang2'], $d['lang3']])) ?></td>
+        <td>
+            <a class="btn-detail" href="uw115_02_driver_detail.php?employee_id=<?= $d['employee_id'] ?>">詳細</a>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+<?php else: ?>
 <tr>
-    <td><?= htmlspecialchars($d['employee_id']) ?></td>
-    <td><?= htmlspecialchars($d['employee_name']) ?></td>
-    <td><?= htmlspecialchars($d['sales_office_name']) ?></td>
-    <td>
-        <?= implode(' / ', array_filter([$d['lang1'], $d['lang2'], $d['lang3']])) ?>
-    </td>
-    <td>
-        <a class="btn-detail"
-           href="uw115_02_driver_detail.php?employee_id=<?= $d['employee_id'] ?>">
-           詳細
-        </a>
+    <td colspan="5" style="text-align:center; padding:20px; color:#777;">
+        該当するドライバーは見つかりませんでした。
     </td>
 </tr>
-<?php endforeach; ?>
+<?php endif; ?>
 
 </table>
 
