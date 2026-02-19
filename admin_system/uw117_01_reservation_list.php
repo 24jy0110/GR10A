@@ -231,19 +231,22 @@ $hasData = ($total > 0);
         }
 
         .table td:nth-child(2),
-        .table td:nth-child(3),
-        .table td:nth-child(7),
-        .table td:nth-child(8) {
+        .table td:nth-child(3) {
             white-space: nowrap;
         }
+
 
         /* ===== バッジ ===== */
 
         .badge {
-            padding: 5px 12px;
-            border-radius: 12px;
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+            padding: 6px 14px;
+            border-radius: 16px;
             color: #fff;
             font-size: 12px;
+            white-space: nowrap;
         }
 
         .badge-STC01 {
@@ -321,6 +324,12 @@ $hasData = ($total > 0);
         .pager a.active {
             background: #000;
             color: #fff;
+        }
+
+        .table th:nth-child(9),
+        .table td:nth-child(9) {
+            width: 110px;
+            text-align: center;
         }
     </style>
 </head>
