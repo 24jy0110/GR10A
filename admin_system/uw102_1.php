@@ -52,9 +52,9 @@ try {
         $pdo->commit();
     }
 
-    header("Location: uw101.php?msg=cancel_success");
-    exit;
+    header("Location: uw102_2.php?r=" . $resNo);
 
+    exit;
 } catch (Exception $e) {
 
     if ($pdo->inTransaction()) {

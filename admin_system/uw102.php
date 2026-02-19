@@ -234,7 +234,7 @@ $canCancel = in_array($res["state_code"], ["STC01", "STC02"]);
     <script>
         function cancelReserve(no) {
             if (confirm("本当にキャンセルしますか？")) {
-                location.href = "uw103.php?r=" + no;
+                location.href = "uw102_1.php?r=" + no;
             }
         }
     </script>
