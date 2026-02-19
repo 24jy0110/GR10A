@@ -451,7 +451,7 @@ $langs     = $pdo->query("SELECT language_category_id, language_category_name FR
 
             <?php if (empty($resList)): ?>
                 <tr>
-                    <td colspan="9" style="text-align:center; padding:30px; color:#888;">
+                    <td colspan="10" style="text-align:center; padding:30px; color:#888;">
                         該当する予約はありません
                     </td>
                 </tr>
