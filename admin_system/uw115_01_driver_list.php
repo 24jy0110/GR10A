@@ -163,7 +163,7 @@ input[type=text], select {
     </select>
 
     <label>キーワード：</label>
-    <input type="text" name="keyword" value="<?= htmlspecialchars($keyword) ?>">
+    <input type="text" name="keyword" placeholder="名前、社員ID" value="<?= htmlspecialchars($keyword) ?>">
 
     <button type="submit" class="btn">検索</button>
 </form>
