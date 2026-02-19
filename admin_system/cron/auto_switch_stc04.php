@@ -8,7 +8,7 @@ SET
     v.vehicle_state = '運行中'
 WHERE r.state_code = 'STC02'
   AND r.service_start_time <= NOW()
-  AND r.service_end_date >= CURDATE()
+  AND CONCAT(r.service_end_date, ' 23:59:59') >= NOW()
   AND r.number_plate IS NOT NULL
 ";
 

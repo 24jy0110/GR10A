@@ -17,31 +17,45 @@ if (!isset($_GET["r"])) {
 $resNo = $_GET["r"];
 
 /* ---------------------------------------------------
-   0) 予約情報取得（含 車種/人数/日付）
+   トランザクション開始（並行対策）
+--------------------------------------------------- */
+$pdo->beginTransaction();
+
+/* ---------------------------------------------------
+   0) 予約情報取得
 --------------------------------------------------- */
 $sql = "
-SELECT r.*, cm.car_model_name, cm.car_model_capacity
+SELECT 
+    r.*,
+    cm.car_model_name,
+    cm.car_model_capacity,
+    cm.car_model_use_fee
 FROM reservation r
 LEFT JOIN car_model cm ON r.car_model_code = cm.car_model_code
 WHERE reservation_number = :no
+FOR UPDATE
 ";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute([":no" => $resNo]);
 $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$res) {
+    $pdo->rollBack();
     die("該当予約が存在しません。");
 }
 
-/* 接单前必须确保仍然是 STC01（仮予約） */
 if ($res["state_code"] !== "STC01") {
+    $pdo->rollBack();
     header("Location: uw122_order_unavailable.php?r=" . urlencode($resNo));
     exit;
 }
 
-/* 利用日付区間 */
+/* ---------------------------------------------------
+   利用日付区間（終了日は23:59:59補正）
+--------------------------------------------------- */
 $res_start = strtotime($res["service_start_time"]);
-$res_end   = strtotime($res["service_end_date"]);
+$res_end   = strtotime($res["service_end_date"] . " 23:59:59");
 $need_capacity = intval($res["ride_count"]);
 
 
@@ -49,48 +63,55 @@ $need_capacity = intval($res["ride_count"]);
    1) 自动配车逻辑
 --------------------------------------------------- */
 
-/* (A) 该营业所全部车辆 */
+/* (A) 本営業所の該当車両 */
 $sql_car = "
-SELECT *
+SELECT number_plate
 FROM vehicle
 WHERE sales_office_code = :office
   AND vehicle_capacity >= :cap
+  AND vehicle_state = '空車'
 ";
 $stmt = $pdo->prepare($sql_car);
 $stmt->execute([
     ":office" => $sales_office,
     ":cap" => $need_capacity
 ]);
-$allCars = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$allCars = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 
-/* (B) 获取这些车已有的订单（STC02, STC04 为占用中）*/
+/* (B) 本営業所の使用中予約のみ取得 */
 $sql_busy = "
-SELECT number_plate, service_start_time, service_end_date
-FROM reservation
-WHERE number_plate IS NOT NULL
-  AND state_code IN ('STC02','STC04')
+SELECT r.number_plate, r.service_start_time, r.service_end_date
+FROM reservation r
+JOIN vehicle v ON r.number_plate = v.number_plate
+WHERE v.sales_office_code = :office
+  AND r.number_plate IS NOT NULL
+  AND r.state_code IN ('STC02','STC04')
 ";
-$busyList = $pdo->query($sql_busy)->fetchAll();
+$stmt = $pdo->prepare($sql_busy);
+$stmt->execute([":office" => $sales_office]);
+$busyList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* 构建车辆 → 占用区间清单 */
+
+/* 占用マップ作成 */
 $busyMap = [];
 foreach ($busyList as $b) {
     $busyMap[$b["number_plate"]][] = [
         strtotime($b["service_start_time"]),
-        strtotime($b["service_end_date"])
+        strtotime($b["service_end_date"] . " 23:59:59")
     ];
 }
 
-function conflict($newS, $newE, $existS, $existE) {
+function conflict($newS, $newE, $existS, $existE)
+{
     return !($newE <= $existS || $existE <= $newS);
 }
 
-/* (C) 选可用车辆 */
+
+/* (C) 可用車両選択 */
 $selected_plate = null;
 
-foreach ($allCars as $car) {
-    $plate = $car["number_plate"];
+foreach ($allCars as $plate) {
 
     $conflictFound = false;
 
@@ -110,11 +131,14 @@ foreach ($allCars as $car) {
 }
 
 if ($selected_plate === null) {
+    $pdo->rollBack();
     die("エラー：利用可能な車両が見つかりません。");
 }
 
 
-
+/* ---------------------------------------------------
+   更新（排他チェック）
+--------------------------------------------------- */
 $upd = "
 UPDATE reservation
 SET driver_id = :driver,
@@ -122,20 +146,24 @@ SET driver_id = :driver,
     state_code = 'STC02',
     reservation_date = NOW()
 WHERE reservation_number = :no
-  AND state_code = 'STC01'   /* ← 再度排他チェック */
+  AND state_code = 'STC01'
 ";
 $stmt = $pdo->prepare($upd);
-$ok = $stmt->execute([
+$stmt->execute([
     ":driver" => $driver_id,
     ":plate"  => $selected_plate,
     ":no"     => $resNo
 ]);
 
-
 if ($stmt->rowCount() === 0) {
+    $pdo->rollBack();
     header("Location: uw122_order_unavailable.php?r=" . urlencode($resNo));
     exit;
 }
+
+/* コミット */
+$pdo->commit();
+
 
 mb_language("Japanese");
 mb_internal_encoding("UTF-8");
@@ -217,82 +245,86 @@ mb_send_mail($to, $subject, $body, $headers);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<title>依頼受付完了 | 丸和交通</title>
+    <meta charset="UTF-8">
+    <title>依頼受付完了 | 丸和交通</title>
 
-<style>
-body {
-    font-family:"Noto Sans JP", sans-serif;
-    background:#fafafa;
-}
-.container {
-    max-width:750px;
-    margin:60px auto;
-    background:#fff;
-    padding:40px;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,.12);
-    text-align:center;
-}
+    <style>
+        body {
+            font-family: "Noto Sans JP", sans-serif;
+            background: #fafafa;
+        }
 
-h1 {
-    font-size:26px;
-    font-weight:700;
-    margin-bottom:20px;
-}
+        .container {
+            max-width: 750px;
+            margin: 60px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+            text-align: center;
+        }
 
-.done-box {
-    padding:20px;
-    background:#e6f7e6;
-    border:1px solid #7ac27a;
-    border-radius:8px;
-    margin:25px 0;
-    font-size:18px;
-    font-weight:bold;
-}
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
 
-.info {
-    background:#f4f4f4;
-    padding:14px;
-    border-radius:6px;
-    font-size:17px;
-    margin:15px 0 30px 0;
-}
+        .done-box {
+            padding: 20px;
+            background: #e6f7e6;
+            border: 1px solid #7ac27a;
+            border-radius: 8px;
+            margin: 25px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
 
-.btn-back {
-    display:inline-block;
-    padding:12px 28px;
-    background:#000;
-    color:#fff;
-    text-decoration:none;
-    border-radius:6px;
-    font-size:16px;
-}
-</style>
+        .info {
+            background: #f4f4f4;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 17px;
+            margin: 15px 0 30px 0;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+    </style>
 
 </head>
+
 <body>
 
-<?php include __DIR__ . "/includes/header_driver.php"; ?>
+    <?php include __DIR__ . "/includes/header_driver.php"; ?>
 
-<div class="container">
+    <div class="container">
 
-    <h1>依頼を受け付けました</h1>
+        <h1>依頼を受け付けました</h1>
 
-    <div class="done-box">
-        ご依頼の受付が完了しました。
+        <div class="done-box">
+            ご依頼の受付が完了しました。
+        </div>
+
+        <div class="info">
+            <div>予約番号：<b><?= htmlspecialchars($resNo) ?></b></div>
+            <div>配車：<b><?= htmlspecialchars($selected_plate) ?></b></div>
+            <div>担当ドライバー：<b><?= htmlspecialchars($driver["employee_name"]) ?> 様</b></div>
+        </div>
+
+        <a href="uw120.php" class="btn-back">トップへ戻る</a>
+
     </div>
-
-    <div class="info">
-        <div>予約番号：<b><?= htmlspecialchars($resNo) ?></b></div>
-        <div>配車：<b><?= htmlspecialchars($selected_plate) ?></b></div>
-        <div>担当ドライバー：<b><?= htmlspecialchars($driver["employee_name"]) ?> 様</b></div>
-    </div>
-
-    <a href="uw120.php" class="btn-back">トップへ戻る</a>
-
-</div>
 
 </body>
+
 </html>
