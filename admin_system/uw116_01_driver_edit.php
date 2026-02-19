@@ -43,11 +43,44 @@ if (!$driver) {
     exit;
 }
 
+/* -----------------------------------------
+   このドライバーの未来予約 & 運行中予約チェック
+------------------------------------------ */
+
+// 運行中（STC04）
+$sql_running = "
+SELECT COUNT(*)
+FROM reservation
+WHERE driver_id = :id
+  AND state_code = 'STC04'
+";
+$stmt = $pdo->prepare($sql_running);
+$stmt->execute([':id' => $employee_id]);
+$running_count = $stmt->fetchColumn();
+
+// 未来予約（STC02）
+$sql_future = "
+SELECT COUNT(*)
+FROM reservation
+WHERE driver_id = :id
+  AND state_code = 'STC02'
+  AND service_start_time > NOW()
+";
+$stmt = $pdo->prepare($sql_future);
+$stmt->execute([':id' => $employee_id]);
+$future_count = $stmt->fetchColumn();
+
+// 営業所変更可能か？
+$can_change_office = ($running_count == 0 && $future_count == 0);
+
 // ---------------------------
 // 営業所一覧取得
 // ---------------------------
-$office_list = $pdo->query("SELECT sales_office_code, sales_office_name FROM sales_office ORDER BY sales_office_code")
-                   ->fetchAll();
+$office_list = $pdo->query("
+SELECT sales_office_code, sales_office_name 
+FROM sales_office 
+ORDER BY sales_office_code
+")->fetchAll();
 
 // ---------------------------
 // 言語一覧取得（日本語 LCAT00 は非表示）
@@ -129,7 +162,7 @@ input[type=text], select {
 
 <script>
 // ---------------------------
-// 外国語は最大3つまで
+// 言語は最大3つまで
 // ---------------------------
 function checkLimit() {
     const checkboxes = document.querySelectorAll(".lang-check");
@@ -140,11 +173,22 @@ function checkLimit() {
 
     if (count > 3) {
         errorMsg.innerText = "※対応言語は最大3つまで選択できます。（日本語は常に対応）";
-        event.preventDefault();
         return false;
     }
-
     errorMsg.innerText = "";
+    return true;
+}
+
+// ---------------------------
+// 営業所変更可能かの最終チェック
+// ---------------------------
+function checkOfficeChange() {
+    const canChange = <?= $can_change_office ? "true" : "false" ?>;
+
+    if (!canChange) {
+        alert("現在または今後の予約があるため、所属営業所を変更できません。");
+        return false;
+    }
     return true;
 }
 </script>
@@ -157,7 +201,8 @@ function checkLimit() {
 
 <h1>ドライバー情報編集：<?= htmlspecialchars($driver['employee_id']) ?></h1>
 
-<form action="uw116_02_driver_edit_confirm.php" method="post" onsubmit="return checkLimit();">
+<form action="uw116_02_driver_edit_confirm.php" method="post"
+      onsubmit="return checkLimit() && checkOfficeChange();">
 
 <div class="form-box">
 
@@ -180,14 +225,20 @@ function checkLimit() {
 
     <div>
         <span class="label">所属営業所：</span>
-        <select name="sales_office_code">
+        <select name="sales_office_code" <?= $can_change_office ? "" : "disabled" ?>>
             <?php foreach ($office_list as $o): ?>
                 <option value="<?= $o['sales_office_code'] ?>"
-                    <?= ($driver['sales_office_code'] === $o['sales_office_code']) ? 'selected' : '' ?>>
+                    <?= ($driver['sales_office_code'] === $o['sales_office_code']) ? "selected" : "" ?>>
                     <?= htmlspecialchars($o['sales_office_name']) ?>
                 </option>
             <?php endforeach; ?>
         </select>
+
+        <?php if (!$can_change_office): ?>
+            <div style="color:red; margin-left:180px; margin-top:4px;">
+                ※ 現在または今後の予約があるため、所属営業所を変更できません。
+            </div>
+        <?php endif; ?>
     </div>
 
     <div>
@@ -197,18 +248,15 @@ function checkLimit() {
     <div class="lang-box">
         <?php foreach ($lang_list as $l): ?>
             <?php
-            // ★ 日本語 (LCAT00) は表示しない
             if ($l['language_category_id'] === 'LCAT00') continue;
-
             $checked = in_array($l['language_category_id'], $current_langs) ? "checked" : "";
             ?>
             <label>
-                <input type="checkbox" 
-                    name="languages[]" 
-                    value="<?= $l['language_category_id'] ?>" 
-                    class="lang-check"
-                    <?= $checked ?>
-                >
+                <input type="checkbox"
+                       name="languages[]"
+                       value="<?= $l['language_category_id'] ?>"
+                       class="lang-check"
+                       <?= $checked ?>>
                 <?= htmlspecialchars($l['language_category_name']) ?>
             </label><br>
         <?php endforeach; ?>
