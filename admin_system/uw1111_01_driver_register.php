@@ -142,7 +142,7 @@ $lang_list = $pdo->query("SELECT * FROM language_category WHERE language_categor
         <div class="label">氏名*：</div>
         <input type="text" name="driver_name" required><br><br>
 
-        <div class="label">氏名（カタカナ）*：</div>
+        <div class="label">氏名（フリガナ）*：</div>
         <input type="text"
             name="driver_name_kana"
             required
@@ -159,7 +159,7 @@ $lang_list = $pdo->query("SELECT * FROM language_category WHERE language_categor
             <?php endforeach; ?>
         </select><br><br>
 
-        <div class="label">対応言語：</div><br>
+        <div class="label">対応言語：（最大3つまで）        </div><br>
         <div class="lang-box">
             <?php foreach ($lang_list as $l): ?>
                 <label>
