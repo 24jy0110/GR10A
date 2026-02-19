@@ -167,8 +167,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="form-row">
             <!-- 車両番号 -->
             <div class="form-block">
-                <label>ナンバープレート（半角英数字と半角）</label>
-                <input type="text" name="number_plate" placeholder="※ 例：品川300あ12-34（半角数字・- 使用）">
+                <label>ナンバープレート<br>※ 例：品川300あ12-34（半角数字・- 使用）</label>
+                <input type="text" name="number_plate">
             </div>
 
             <!-- 車種 -->
