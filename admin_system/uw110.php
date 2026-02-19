@@ -4,9 +4,10 @@ require_once __DIR__ . "/includes/db_connect.php";
 require_once __DIR__ . "/includes/header.php";
 
 // 登录用户信息
-$employee_name = $_SESSION['employee_name'] ?? '';
-$sales_office_name = $_SESSION['sales_office_name'] ?? '';
-$department_name = "配車管理課";  // 课名固定
+$employee = $_SESSION['employee'] ?? null;
+$employee_name     = $employee['employee_name'] ?? '';
+$sales_office_name = $employee['sales_office_name'] ?? '';
+$department_name = "配車管理課";
 ?>
 
 <style>
@@ -19,10 +20,13 @@ $department_name = "配車管理課";  // 课名固定
     }
 
     .main-title {
-        font-size: 22px;
-        margin-bottom: 30px;
-        line-height: 1.6em;
-    }
+    font-size: 26px;
+    font-weight: 700;
+    color: #000;           /* 纯黑 */
+    margin-bottom: 30px;
+    line-height: 1.8em;
+    margin-top:40px
+}
 
     .menu-btn {
         width: 260px;
