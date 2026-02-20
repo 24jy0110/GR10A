@@ -33,7 +33,7 @@ if (!$res) {
 
 /* 乗車日時 */
 $rideDate = date("Y/m/d H:i", strtotime($res["service_start_time"]));
-
+$endDate = date("Y/m/d", strtotime($res["service_end_date"]));
 /* 日数計算 */
 $start = new DateTime($res["service_start_time"]);
 $end   = new DateTime($res["service_end_date"]);
@@ -48,111 +48,156 @@ if ($start->diff($end)->days == 0) {
 ?>
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<title>依頼受付確認 | 丸和交通</title>
+    <meta charset="UTF-8">
+    <title>依頼受付確認 | 丸和交通</title>
 
-<style>
-body {
-    font-family:"Noto Sans JP",sans-serif;
-    background:#fafafa;
-    margin:0;
-}
-.container {
-    max-width:800px;
-    margin:40px auto;
-    background:#fff;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    text-align:center;
-}
+    <style>
+        body {
+            font-family: "Noto Sans JP", sans-serif;
+            background: #fafafa;
+            margin: 0;
+        }
 
-h1 {
-    font-size:24px;
-    font-weight:bold;
-    margin-bottom:25px;
-}
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
 
-.info-table {
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-.info-table th, .info-table td {
-    border:1px solid #ccc;
-    padding:12px;
-    font-size:15px;
-}
-.info-table th {
-    background:#f2f2f2;
-    width:230px;
-    font-weight:600;
-}
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
 
-.msg-box {
-    margin-top:30px;
-    padding:18px;
-    font-size:18px;
-    background:#fff7e0;
-    border:1px solid #f0d48a;
-    border-radius:6px;
-    font-weight:bold;
-}
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-.btn-area {
-    margin-top:35px;
-}
+        .info-table th,
+        .info-table td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            font-size: 15px;
+        }
 
-.btn {
-    padding:12px 32px;
-    font-size:16px;
-    border-radius:6px;
-    text-decoration:none;
-    color:#fff;
-    margin:0 15px;
-    display:inline-block;
-}
-.btn-back { background:#555; }
-.btn-back:hover { background:#333; }
+        .info-table th {
+            background: #f2f2f2;
+            width: 230px;
+            font-weight: 600;
+        }
 
-.btn-yes { background:#000; }
-.btn-yes:hover { background:#222; }
-</style>
+        .msg-box {
+            margin-top: 30px;
+            padding: 18px;
+            font-size: 18px;
+            background: #fff7e0;
+            border: 1px solid #f0d48a;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .btn-area {
+            margin-top: 35px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            font-size: 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #fff;
+            margin: 0 15px;
+            display: inline-block;
+        }
+
+        .btn-back {
+            background: #555;
+        }
+
+        .btn-back:hover {
+            background: #333;
+        }
+
+        .btn-yes {
+            background: #000;
+        }
+
+        .btn-yes:hover {
+            background: #222;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<?php include __DIR__ . "/includes/header_driver.php"; ?>
+    <?php include __DIR__ . "/includes/header_driver.php"; ?>
 
-<div class="container">
+    <div class="container">
 
-<h1>依頼受付の確認</h1>
+        <h1>依頼受付の確認</h1>
 
-<p class="msg-box">この依頼を受け付けてもよろしいですか？</p>
+        <p class="msg-box">この依頼を受け付けてもよろしいですか？</p>
 
-<table class="info-table">
-<tr><th>予約番号</th><td><?= htmlspecialchars($res["reservation_number"]) ?></td></tr>
-<tr><th>乗車日時</th><td><?= $rideDate ?></td></tr>
-<tr><th>利用日数</th><td><?= $days ?> 日</td></tr>
-<tr><th>乗車場所</th><td><?= nl2br(htmlspecialchars($res["ride_location"])) ?></td></tr>
-<tr><th>降車場所</th><td><?= nl2br(htmlspecialchars($res["drop_off_location"])) ?></td></tr>
-<tr><th>車種</th><td><?= htmlspecialchars($res["car_model_name"]) ?></td></tr>
-<tr><th>人数</th><td><?= htmlspecialchars($res["ride_count"]) ?> 名</td></tr>
-<tr><th>顧客名</th><td><?= htmlspecialchars($res["customer_name"]) ?></td></tr>
-</table>
+        <table class="info-table">
+            <tr>
+                <th>予約番号</th>
+                <td><?= htmlspecialchars($res["reservation_number"]) ?></td>
+            </tr>
+            <tr>
+                <th>乗車日時</th>
+                <td><?= $rideDate ?></td>
+            </tr>
+            <tr>
+                <th>利用日数</th>
+                <td><?= $days ?> 日</td>
+            </tr>
+            <tr>
+                <th>降車日</th>
+                <td><?= $endDate ?></td>
+            </tr>
+            <tr>
+                <th>乗車場所</th>
+                <td><?= nl2br(htmlspecialchars($res["ride_location"])) ?></td>
+            </tr>
+            <tr>
+                <th>降車場所</th>
+                <td><?= nl2br(htmlspecialchars($res["drop_off_location"])) ?></td>
+            </tr>
+            <tr>
+                <th>車種</th>
+                <td><?= htmlspecialchars($res["car_model_name"]) ?></td>
+            </tr>
+            <tr>
+                <th>人数</th>
+                <td><?= htmlspecialchars($res["ride_count"]) ?> 名</td>
+            </tr>
+            <tr>
+                <th>顧客名</th>
+                <td><?= htmlspecialchars($res["customer_name"]) ?></td>
+            </tr>
+        </table>
 
-<div class="btn-area">
-    <a href="uw122_01_order_detail.php?r=<?= urlencode($resNo) ?>" class="btn btn-back">戻る</a>
+        <div class="btn-area">
+            <a href="uw122_01_order_detail.php?r=<?= urlencode($resNo) ?>" class="btn btn-back">戻る</a>
 
-    <a href="uw122_03_order_accept_done.php?r=<?= urlencode($resNo) ?>"
-       class="btn btn-yes">
-        はい、この依頼を受け付ける
-    </a>
-</div>
+            <a href="uw122_03_order_accept_done.php?r=<?= urlencode($resNo) ?>"
+                class="btn btn-yes">
+                はい、この依頼を受け付ける
+            </a>
+        </div>
 
-</div>
+    </div>
 
 </body>
+
 </html>

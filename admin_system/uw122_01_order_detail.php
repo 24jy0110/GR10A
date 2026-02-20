@@ -142,7 +142,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; margin:0; }
 <tr><th>顧客名</th><td><?= htmlspecialchars($res["customer_name"]) ?></td></tr>
 <tr><th>人数</th><td><?= htmlspecialchars($res["ride_count"]) ?> 名</td></tr>
 <tr><th>電話番号</th><td><?= htmlspecialchars($res["customer_phone"]) ?></td></tr>
-<tr><th>メール</th><td><?= htmlspecialchars($res["customer_email"]) ?></td></tr>
+<tr><th>メールアドレス</th><td><?= htmlspecialchars($res["customer_email"]) ?></td></tr>
 </table>
 
 <!-- ③ 言語要求 -->
