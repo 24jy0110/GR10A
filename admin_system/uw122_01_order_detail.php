@@ -148,7 +148,7 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; margin:0; }
 <div class="btn-area">
     <a href="uw122_new_orders.php" class="btn-back">一覧へ戻る</a>
 
-    <a href="uw12202_order_accept_confirm.php?r=<?= urlencode($resNo) ?>"
+    <a href="uw122_02_order_accept_confirm.php?r=<?= urlencode($resNo) ?>"
        class="btn-accept">
         この依頼を受ける
     </a>

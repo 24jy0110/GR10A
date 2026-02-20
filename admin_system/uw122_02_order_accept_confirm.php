@@ -144,9 +144,9 @@ h1 {
 </table>
 
 <div class="btn-area">
-    <a href="uw12201_order_detail.php?r=<?= urlencode($resNo) ?>" class="btn btn-back">戻る</a>
+    <a href="uw122_01_order_detail.php?r=<?= urlencode($resNo) ?>" class="btn btn-back">戻る</a>
 
-    <a href="uw12202_order_accept_done.php?r=<?= urlencode($resNo) ?>"
+    <a href="uw122_03_order_accept_done.php?r=<?= urlencode($resNo) ?>"
        class="btn btn-yes">
         はい、この依頼を受け付ける
     </a>

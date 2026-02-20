@@ -173,7 +173,7 @@ foreach ($orders as $o) {
                         <td><?= nl2br(htmlspecialchars($o["ride_location"])) ?></td>
                         <td><?= htmlspecialchars($o["customer_name"]) ?></td>
                         <td>
-                            <a href="uw12201_order_detail.php?r=<?= $o["reservation_number"] ?>" class="detail-btn">
+                            <a href="uw122_01_order_detail.php?r=<?= $o["reservation_number"] ?>" class="detail-btn">
                                 詳細を見る
                             </a>
                         </td>
