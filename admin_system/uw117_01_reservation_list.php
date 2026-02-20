@@ -350,7 +350,7 @@ $hasData = ($total > 0);
                 <label>キーワード検索</label>
                 <input type="text"
                     name="keyword"
-                    placeholder="予約番号 / 氏名 / 乗車 / 降車 / 車種 / ナンバー"
+                    placeholder="予約番号 / 氏名 / 乗車 / 降車 / 車種 / ナンバープレート"
                     value="<?= htmlspecialchars($keyword) ?>">
             </div>
 
