@@ -152,7 +152,7 @@ h1 { font-size:28px; margin-bottom:30px; }
     <span class="badge badge-STC04">運行中</span><br>
 
     <a class="detail-btn"
-       href="uw121_01_driver_task_detail.php?r=<?= urlencode($current_task["reservation_number"]) ?>">
+       href="uw121_02_driver_task_detail.php?r=<?= urlencode($current_task["reservation_number"]) ?>">
         詳細を見る
     </a>
 </div>
@@ -175,7 +175,7 @@ h1 { font-size:28px; margin-bottom:30px; }
     <span class="badge badge-STC02">予約確定</span><br>
 
     <a class="detail-btn"
-       href="uw121_01_driver_task_detail.php?r=<?= urlencode($f["reservation_number"]) ?>">
+       href="uw121_02_driver_task_detail.php?r=<?= urlencode($f["reservation_number"]) ?>">
         詳細を見る
     </a>
 </div>
@@ -204,7 +204,7 @@ h1 { font-size:28px; margin-bottom:30px; }
     <br>
 
     <a class="detail-btn"
-       href="uw121_01_driver_task_detail.php?r=<?= urlencode($h["reservation_number"]) ?>">
+       href="uw121_02_driver_task_detail.php?r=<?= urlencode($h["reservation_number"]) ?>">
         詳細を見る
     </a>
 </div>

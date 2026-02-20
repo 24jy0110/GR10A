@@ -10,7 +10,7 @@ $driver_id = $driver['employee_id'];
    GET パラメータ
 --------------------------------------------------- */
 if (!isset($_GET['r'])) {
-    header("Location: uw121_driver_tasks.php");
+    header("Location: uw121_01_driver_tasks.php");
     exit;
 }
 $resNo = $_GET['r'];
@@ -204,7 +204,7 @@ function finishTask(no) {
     </table>
 
     <div class="btn-area">
-        <a href="uw121_driver_tasks.php" class="btn-back">行程一覧に戻る</a>
+        <a href="uw121_01_driver_tasks.php" class="btn-back">行程一覧に戻る</a>
 
         <?php if ($canFinish): ?>
             <button class="btn-finish"

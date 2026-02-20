@@ -10,7 +10,7 @@ $driver_id = $driver["employee_id"];
     GET パラメータチェック
 --------------------------------------------------- */
 if (!isset($_GET["r"])) {
-    header("Location: uw121_driver_tasks.php");
+    header("Location: uw121_01_driver_tasks.php");
     exit;
 }
 $resNo = $_GET["r"];
