@@ -39,13 +39,26 @@ if (!empty($keyword)) {
 }
 
 /* date range */
+/* date range */
+
+/* 開始日：当天开始的订单 */
 if (!empty($date_start)) {
-    $where .= " AND DATE(r.service_start_time) >= :date_start ";
-    $params[':date_start'] = $date_start;
+    $where .= "
+        AND r.service_start_time >= :start_begin
+        AND r.service_start_time < :start_next
+    ";
+    $params[':start_begin'] = $date_start . " 00:00:00";
+    $params[':start_next']  = date("Y-m-d", strtotime($date_start . " +1 day")) . " 00:00:00";
 }
+
+/* 終了日：当天结束的订单 */
 if (!empty($date_end)) {
-    $where .= " AND DATE(r.service_start_time) <= :date_end ";
-    $params[':date_end'] = $date_end;
+    $where .= "
+        AND r.service_end_date >= :end_begin
+        AND r.service_end_date < :end_next
+    ";
+    $params[':end_begin'] = $date_end . " 00:00:00";
+    $params[':end_next']  = date("Y-m-d", strtotime($date_end . " +1 day")) . " 00:00:00";
 }
 
 /* state */
@@ -457,7 +470,6 @@ $hasData = ($total > 0);
             <?php else: ?>
                 <?php foreach ($resList as $r): ?>
                     <tr>
-                    <tr>
                         <td><?= htmlspecialchars($r['reservation_number']) ?></td>
                         <td><?= htmlspecialchars($r['sales_office_name']) ?></td>
                         <td>
@@ -476,9 +488,6 @@ $hasData = ($total > 0);
                                 -
                             <?php endif; ?>
                         </td>
-
-                        </td>
-
                         <td><?= htmlspecialchars($r['ride_location']) ?></td>
 
                         <td><?= htmlspecialchars($r['drop_off_location']) ?></td>
