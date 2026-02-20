@@ -30,22 +30,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $sales_office_code = $_POST['sales_office_code'] ?? '';
 
     /* ① 必填校验 */
-    if ($number_plate === '' || $car_model_code === '' || $sales_office_code === '') {
-        $error = "未入力の項目があります。";
-    } else {
-        /* ② 日本ナンバー形式チェック（无空格版） */
+    if (!preg_match('/^([一-龯]{2,})(\d{3})([ぁ-ん])(\d{2})-(\d{2})$/u', $number_plate, $matches)) {
 
-        $pattern = '/^[一-龯]{2,}\d{3}[あ-お]\d{2}-\d{2}$/u';
-
-        if (!preg_match($pattern, $number_plate)) {
-
+        if (mb_strlen($number_plate) < 9) {
+            $error = "ナンバープレートの桁数が不足しています。";
+        } elseif (!preg_match('/^[一-龯]{2,}/u', $number_plate)) {
+            $error = "地名部分は漢字2文字以上で入力してください。";
+        } elseif (!preg_match('/^[一-龯]{2,}\d{3}/u', $number_plate)) {
+            $error = "分類番号は半角3桁数字で入力してください。";
+        } elseif (!preg_match('/^[一-龯]{2,}\d{3}[あ-お]/u', $number_plate)) {
+            $error = "ひらがなは「あ〜お」のみ使用可能です。";
+        } elseif (!preg_match('/\d{2}-\d{2}$/', $number_plate)) {
+            $error = "番号部分は「12-34」の形式で入力してください（半角数字・半角ハイフン）。";
+        } else {
             $error = "ナンバープレート形式が正しくありません。
-            例：品川500あ90-12
-            ※空白なし・半角数字・半角ハイフン使用";
+例：品川500あ90-12
+※空白なし・半角数字・半角ハイフン使用";
+        }
+    } else {
+
+        /* ③ かな严格限制 */
+        $kana = $matches[3];
+
+        if (!preg_match('/^[あ-お]$/u', $kana)) {
+            $error = "ひらがなは「あ〜お」のみ使用可能です。";
         } else {
 
-
-            /* ③ 重複チェック */
+            /* ④ 重複チェック */
             $sql = "SELECT COUNT(*) FROM vehicle WHERE number_plate = :num";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([":num" => $number_plate]);
@@ -55,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $error = "このナンバープレートの車両は既に登録されています。";
             } else {
 
-                /* ④ 車種から定員取得 */
+                /* ⑤ 車種確認 */
                 $sql = "SELECT car_model_capacity
                         FROM car_model
                         WHERE car_model_code = :cm";
@@ -67,8 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $error = "車種情報の取得に失敗しました。";
                 } else {
 
-                    /* 格式 & 重複チェック通过后 */
-
+                    /* ⑥ 成功 */
                     $_SESSION["vehicle_add"] = [
                         "number_plate"      => $number_plate,
                         "car_model_code"    => $car_model_code,
