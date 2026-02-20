@@ -20,10 +20,18 @@ SELECT
     r.*,
     s.state_name,
     cm.car_model_name,
-    cm.car_model_capacity
+    cm.car_model_capacity,
+    l1.language_category_name AS lang1_name,
+    l2.language_category_name AS lang2_name
 FROM reservation r
-LEFT JOIN reservation_state s ON r.state_code = s.state_code
-LEFT JOIN car_model cm ON cm.car_model_code = r.car_model_code
+LEFT JOIN reservation_state s 
+       ON r.state_code = s.state_code
+LEFT JOIN car_model cm 
+       ON cm.car_model_code = r.car_model_code
+LEFT JOIN language_category l1
+       ON r.lang_pref_1 = l1.language_category_id
+LEFT JOIN language_category l2
+       ON r.lang_pref_2 = l2.language_category_id
 WHERE r.reservation_number = :no
 ";
 $stmt = $pdo->prepare($sql);
@@ -140,8 +148,14 @@ body { font-family:"Noto Sans JP",sans-serif; background:#fafafa; margin:0; }
 <!-- ③ 言語要求 -->
 <div class="section-title">③ 言語</div>
 <table class="detail-table">
-<tr><th>主な希望言語</th><td><?= htmlspecialchars($res["lang_pref_1"]) ?></td></tr>
-<tr><th>副言語</th><td><?= htmlspecialchars($res["lang_pref_2"] ?: "なし") ?></td></tr>
+<tr>
+    <th>主な希望言語</th>
+    <td><?= htmlspecialchars($res["lang1_name"] ?? "なし") ?></td>
+</tr>
+<tr>
+    <th>副言語</th>
+    <td><?= htmlspecialchars($res["lang2_name"] ?? "なし") ?></td>
+</tr>
 </table>
 
 <!-- ④ 操作 -->
