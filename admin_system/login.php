@@ -14,71 +14,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($employee_id === '' || $password === '') {
         $error = "社員ID または パスワードが未入力です。";
+
     } else {
 
-        // DBから employee を取得
+        /* ------------------------------
+           社員情報（employee）取得
+        ------------------------------ */
         $sql = "
-SELECT 
-    e.employee_id,
-    e.employee_name,
-    e.sales_office_code,
-    e.password,
-    so.sales_office_name
-FROM employee e
-LEFT JOIN sales_office so 
-    ON e.sales_office_code = so.sales_office_code
-WHERE e.employee_id = :id
-";
+        SELECT 
+            e.employee_id,
+            e.employee_name,
+            e.sales_office_code,
+            e.password,
+            so.sales_office_name
+        FROM employee e
+        LEFT JOIN sales_office so 
+            ON e.sales_office_code = so.sales_office_code
+        WHERE e.employee_id = :id
+        ";
 
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':id', $employee_id, PDO::PARAM_STR);
         $stmt->execute();
         $emp = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        /* ------------------------------
+           ID または Password 不一致
+        ------------------------------ */
         if (!$emp || $emp['password'] !== $password) {
             $error = "社員ID または パスワードが違います。";
+
         } else {
 
             /* ------------------------------
-               🔥 古い形式のセッション削除
+               🔥 退職ユーザー ログイン禁止
             ------------------------------ */
-            unset($_SESSION['employee_id']);
-            unset($_SESSION['employee_name']);
-            unset($_SESSION['job_code']);
+            $sql_status = "SELECT driver_status FROM driver WHERE employee_id = :id";
+            $stmt_status = $pdo->prepare($sql_status);
+            $stmt_status->execute([':id' => $employee_id]);
+            $status = $stmt_status->fetchColumn();
 
-            /* ------------------------------
-               新形式でログイン情報保存
-            ------------------------------ */
-            $job_code = substr($employee_id, 8, 2);
+            if ($status === '退職') {
+                $error = "退職済みアカウントのためログインできません。";
 
-            $_SESSION['employee'] = [
-                'employee_id'       => $emp['employee_id'],
-                'employee_name'     => $emp['employee_name'],
-                'sales_office_code' => $emp['sales_office_code'],
-                'sales_office_name' => $emp['sales_office_name'], 
-                'job_code'          => $job_code
-            ];
+            } else {
 
+                /* ------------------------------
+                   古い形式セッション削除
+                ------------------------------ */
+                unset($_SESSION['employee_id']);
+                unset($_SESSION['employee_name']);
+                unset($_SESSION['job_code']);
 
-            /* ------------------------------
-               職種別TOPへ遷移
-            ------------------------------ */
-            switch ($job_code) {
-                case '01':
-                    header("Location: uw100.php");
-                    break; // 受付
-                case '02':
-                    header("Location: uw110.php");
-                    break; // 配車
-                case '03':
-                    header("Location: uw120.php");
-                    break; // ドライバー
-                default:
-                    $error = "不正な職種コードです。";
-                    break;
+                /* ------------------------------
+                   新形式セッション保存
+                ------------------------------ */
+                $job_code = substr($employee_id, 8, 2);
+
+                $_SESSION['employee'] = [
+                    'employee_id'       => $emp['employee_id'],
+                    'employee_name'     => $emp['employee_name'],
+                    'sales_office_code' => $emp['sales_office_code'],
+                    'sales_office_name' => $emp['sales_office_name'],
+                    'job_code'          => $job_code
+                ];
+
+                /* ------------------------------
+                   職種別 TOP へ遷移
+                ------------------------------ */
+                switch ($job_code) {
+                    case '01':
+                        header("Location: uw100.php"); break; // 受付
+                    case '02':
+                        header("Location: uw110.php"); break; // 配車
+                    case '03':
+                        header("Location: uw120.php"); break; // ドライバー
+                    default:
+                        $error = "不正な職種コードです。";
+                        break;
+                }
+
+                exit;
             }
-
-            exit;
         }
     }
 }
