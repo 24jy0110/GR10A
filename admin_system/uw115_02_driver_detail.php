@@ -23,6 +23,7 @@ SELECT
     e.employee_name_kana,
     so.sales_office_name,
     d.driver_email,
+    d.driver_status,  
     lc1.language_category_name AS lang1,
     lc2.language_category_name AS lang2,
     lc3.language_category_name AS lang3
@@ -118,6 +119,7 @@ h1 {
     <span class="label">氏名：</span><?= htmlspecialchars($driver['employee_name']) ?><br>
     <span class="label">氏名（カナ）：</span><?= htmlspecialchars($driver['employee_name_kana']) ?><br>
     <span class="label">所属営業所：</span><?= htmlspecialchars($driver['sales_office_name']) ?><br>
+    <span class="label">在籍状況：</span><?= htmlspecialchars($driver['driver_status']) ?><br>
     <span class="label">対応言語：</span><?= $language_text ?><br>
     <span class="label">メールアドレス：</span><?= htmlspecialchars($driver['driver_email']) ?><br>
 </div>

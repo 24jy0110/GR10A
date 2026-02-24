@@ -9,6 +9,7 @@ require_once __DIR__ . '/includes/check_login.php';
 $employee_id       = $_POST['employee_id'] ?? '';
 $sales_office_code = $_POST['sales_office_code'] ?? '';
 $languages         = $_POST['languages'] ?? [];
+$driver_status = $_POST['driver_status'] ?? '在職';
 
 if (!$employee_id) {
     echo "不正なアクセスです。";
@@ -44,7 +45,8 @@ $sql_drv = "
 UPDATE driver
 SET language_id_1 = :l1,
     language_id_2 = :l2,
-    language_id_3 = :l3
+    language_id_3 = :l3,
+    driver_status = :status
 WHERE employee_id = :id
 ";
 
@@ -53,6 +55,7 @@ $stmt2->bindValue(':l1', $language_id_1);
 $stmt2->bindValue(':l2', $language_id_2);
 $stmt2->bindValue(':l3', $language_id_3);
 $stmt2->bindValue(':id', $employee_id);
+$stmt2->bindValue(':status', $driver_status);
 $stmt2->execute();
 
 ?>
