@@ -141,15 +141,39 @@ input {
     font-weight: bold;
 }
 
-.btn-next {
-    background: #000;
-    color: #fff;
-    padding: 14px 32px;
+.button-row {
+    display: flex;
+    justify-content: center;   /* 居中 */
+    gap: 30px;                 /* 按钮之间间距 */
+    margin-top: 30px;
+}
+
+/* 两个按钮统一尺寸 */
+.btn-next,
+.btn-back {
+    width: 180px;              /* 固定宽度，大小一致 */
+    padding: 14px 0;
     font-size: 18px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+}
+
+/* 戻る按钮样式 */
+.btn-back {
+    background: #aaa;
+    color: #fff;
+}
+
+.btn-back:hover {
+    background: #777;
+}
+
+/* 次へ按钮样式 */
+.btn-next {
+    background: #000;
+    color: #fff;
 }
 
 .btn-next:hover {
@@ -203,8 +227,10 @@ input {
 </tr>
 
 </table>
-
-<button type="submit" class="btn-next">次へ</button>
+<div class="button-row">
+    <button type="button" class="btn-back" onclick="location.href='uw05_02.php'">戻る</button>
+    <button type="submit" class="btn-next">次へ</button>
+</div>
 
 </form>
 </div>
